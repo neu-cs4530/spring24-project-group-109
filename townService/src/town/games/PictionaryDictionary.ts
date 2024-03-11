@@ -1,3 +1,6 @@
+/*
+ * Dictionary for the Pictionary game. Contains easy, medium and hard words.
+ */
 const easyWords = [
     "apple",
     "banana",
