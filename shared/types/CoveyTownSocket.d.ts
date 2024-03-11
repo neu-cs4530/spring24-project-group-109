@@ -168,9 +168,19 @@ export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard';
 
 export type PictionaryTeamLetter = 'A' | 'B';
 
+/**
+ * Type for a move in Pictionary
+ */
+export interface PictionaryMove {
+  guess: string;
+}
 
+/**
+ * Type for the state of a Pictionary game
+ */
 export interface PictionaryGameState extends WinnableGameState {
   drawer?: PlayerID;
+  guesser?: PlayerID;
   word?: string;
   difficulty?: PictionaryWordDifficulty;
   teamA?: PictionaryTeam;
@@ -182,6 +192,9 @@ export interface PictionaryGameState extends WinnableGameState {
   round: number;
 }
 
+/**
+ * Type for a team in Pictionary
+ */
 export interface PictionaryTeam {
   team: PictionaryTeamLetter;
   players: PlayerID[];
