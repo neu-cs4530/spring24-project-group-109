@@ -1,16 +1,15 @@
 import Player from '../lib/Player';
-import { Interactable, InteractableCommand, InteractableCommandReturnType } from '../types/CoveyTownSocket';
+import { Interactable, InteractableCommand, InteractableCommandReturnType, InteractableType } from '../types/CoveyTownSocket';
 import InteractableArea from './InteractableArea';
-import { Color } from '../types/CoveyTownSocket';
-// define in types; Export type Color = `#${string}`;
+
 
 const WHITEBOARD_HEIGHT = 10;
 const WHITEBOARD_WIDTH= 10;
 
-export default class WhiteBoardArea extends InteractableArea {  
-    public constructor() {
-        super();
-    }
+export default class WhiteBoardArea extends GameArea<PictionaryGame> {  
+    // public constructor() {
+    //     super();
+    // }
 
 }
 
