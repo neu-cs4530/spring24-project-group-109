@@ -12,11 +12,20 @@ import InvalidParametersError, {
   INVALID_DRAWER_MESSAGE,
 } from '../lib/InvalidParametersError';
 
+/**
+ * WhiteBoardArea is a class that represents the state of a whiteboard.
+ */
 export default class WhiteBoardArea extends WhiteBoardModel {
   protected getType(): InteractableType {
     return 'WhiteBoardArea';
   }
 
+  /**
+   * Handle a given command.
+   * @param command The command to be handled.
+   * @param player The player who issued the command.
+   * @returns void
+   */
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
     player: Player,
