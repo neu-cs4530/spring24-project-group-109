@@ -1,7 +1,7 @@
 /*
  * Dictionary for the Pictionary game. Contains easy, medium and hard words.
  */
-const easyWords = [
+export const easyWords = [
     "apple",
     "banana",
     "cat",
@@ -57,7 +57,7 @@ const easyWords = [
     "grapes",
     "donut",
     ];
-const mediumWords = [
+export const mediumWords = [
     "goat",
     "dolphin",
     "apple pie",
@@ -110,7 +110,7 @@ const mediumWords = [
     "money",
     "couch",
     ];
-const hardWords = [
+export const hardWords = [
     "chimpanzee",
     "flamingo",
     "giraffe",
