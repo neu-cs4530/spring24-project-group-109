@@ -183,11 +183,11 @@ export interface PictionaryGameState extends WinnableGameState {
   guesser?: PlayerID;
   word?: string;
   difficulty?: PictionaryWordDifficulty;
-  teamA?: PictionaryTeam;
-  teamB?: PictionaryTeam;
+  teamA: PictionaryTeam;
+  teamB: PictionaryTeam;
   teamAReady?: boolean;
   teamBReady?: boolean;
-  usedWords?: string[];
+  usedWords: string[];
   timer: number;
   round: number;
 }
@@ -196,7 +196,7 @@ export interface PictionaryGameState extends WinnableGameState {
  * Type for a team in Pictionary
  */
 export interface PictionaryTeam {
-  team: PictionaryTeamLetter;
+  letter: PictionaryTeamLetter;
   players: PlayerID[];
   score: number; 
 
