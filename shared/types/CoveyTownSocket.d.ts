@@ -298,11 +298,15 @@ export interface EraseCommand {
 export interface ResetCommand {
   type: 'ResetCommand';
 }
+
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
   CommandType extends LeaveGameCommand ? undefined :
+  CommandType extends DrawCommand ? undefined :
+  CommandType extends EraseCommand ? undefined :
+  CommandType extends ResetCommand ? undefined :
   never;
 
 export type InteractableCommandResponse<MessageType> = {
