@@ -5,7 +5,7 @@ const WHITEBOARD_HEIGHT = 10;
 const WHITEBOARD_WIDTH = 10;
 
 /**
- * WhiteBoardModel is a class that represents the state of a whiteboard.
+ * WhiteBoardModel is a class that represents a whiteboard.
  */
 export default class WhiteBoardModel {
   board: Color[][]; // Do we need to initialize this? or add const/let
