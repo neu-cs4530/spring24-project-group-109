@@ -4,6 +4,9 @@ import { Color, Pixel } from '../types/CoveyTownSocket';
 const WHITEBOARD_HEIGHT = 10;
 const WHITEBOARD_WIDTH = 10;
 
+/**
+ * WhiteBoardModel is a class that represents the state of a whiteboard.
+ */
 export default class WhiteBoardModel {
   board: Color[][]; // Do we need to initialize this? or add const/let
 
@@ -11,6 +14,12 @@ export default class WhiteBoardModel {
     this.board = this._getBoard();
   }
 
+  /**
+   * Draw a given drawing on the whiteboard.
+   * @param drawing The drawing to be drawn on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void
+   */
   public draw(drawing: Pixel[]): void {
     drawing.forEach((pixel: Pixel) => {
       if (
@@ -27,6 +36,12 @@ export default class WhiteBoardModel {
     });
   }
 
+  /**
+   * Erase a given drawing on the whiteboard.
+   * @param drawing The drawing to be erased on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void
+   */
   public erase(drawing: Pixel[]): void {
     drawing.forEach((pixel: Pixel) => {
       if (
@@ -43,6 +58,9 @@ export default class WhiteBoardModel {
     });
   }
 
+  /**
+   * Reset the whiteboard to its initial blank state.
+   */
   public reset(): void {
     this.board = this._getBoard();
   }
