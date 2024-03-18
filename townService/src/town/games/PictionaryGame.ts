@@ -17,19 +17,18 @@ import {
   PictionaryMove,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
-import { easyWords, mediumWords, hardWords } from './PictionaryDictionary';
 
 function getOtherTeamLetter(letter: PictionaryTeamLetter): PictionaryTeamLetter {
   return letter === 'A' ? 'B' : 'A';
 }
+
+const ROUND_TIME = 60; // seconds
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
  * @see https://en.wikipedia.org/wiki/Pictionary
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
-  private wordList: string[];
-
   public constructor() {
     super({
       drawer: undefined,
@@ -41,11 +40,45 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamAReady: false,
       teamBReady: false,
       usedWords: [],
-      timer: 60, // seconds
+      timer: ROUND_TIME, // seconds
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
     });
-    this.wordList = easyWords;
+  }
+
+  private _assignNewRoles(): void {
+    const team = this.state.round % 2 === 1 ? this.state.teamA : this.state.teamB;
+    if (this.state.round <= 2) {
+      this.state = {
+        ...this.state,
+        drawer: team.players[0],
+        guesser: team.players[1],
+      };
+    }
+    if (this.state.round > 2) {
+      this.state = {
+        ...this.state,
+        drawer: team.players[1],
+        guesser: team.players[0],
+      };
+    }
+  }
+
+  /**
+   * Updates the round clock to count done. Meant to be called once a second.
+   * @throws InvalidParametersError if the game is not full (GAME_NOT_STARTABLE_MESSAGE)
+   */
+  public tickDown(): void {
+    if (this.state.round === 5) {
+      this.state = { ...this.state, status: 'OVER' };
+    } else if (this.state.status === 'IN_PROGRESS') {
+      if (this.state.timer > 0) {
+        this.state = { ...this.state, timer: this.state.timer - 1 };
+      } else if (this.state.timer === 0) {
+        this.state = { ...this.state, timer: ROUND_TIME, round: this.state.round + 1 };
+        this._assignNewRoles();
+      }
+    }
   }
 
   /**
@@ -86,28 +119,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   /**
-   * Choose a word from the word list based on the difficulty. Check to make sure that word is not already in the usedWords list. If it is, choose another word.
+   * Chooses a word for the drawer to draw from the appropriate list in the PictionaryDictionary based on the difficulty of the game.
    */
   private _chooseWord(): string {
-    let word = '';
-    while (word === '' || this.state.usedWords.includes(word)) {
-      const randomIndex = Math.floor(Math.random() * this.wordList.length);
-      word = this.wordList[randomIndex];
-    }
-    return word;
+    return '';
   }
-
-  // start game
-  // const { difficulty } = this.state;
-  //   // get a random word from the PictionaryDictionary array based on the difficulty
-  //   let wordList = undefined;
-  //   if (difficulty === 'Medium') {
-  //     wordList = mediumWords;
-  //   } else if (difficulty === 'Hard') {
-  //     wordList = hardWords;
-  //   } else {
-  //     wordList = easyWords;
-  //   }
 
   /**
    * Adds a player to the game, first adding to team A until full (2) and then to team B (2).
