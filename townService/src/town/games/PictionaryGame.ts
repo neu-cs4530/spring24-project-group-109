@@ -8,6 +8,7 @@ import InvalidParametersError, {
 import Player from '../../lib/Player';
 import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
+import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
 const ROUND_TIME = 60; // seconds
 
@@ -16,6 +17,8 @@ const ROUND_TIME = 60; // seconds
  * @see https://en.wikipedia.org/wiki/Pictionary
  */
 export default class PictionaryGame extends Game<PictionaryGameState, PictionaryMove> {
+  private _wordList: string[];
+
   public constructor() {
     super({
       drawer: undefined,
@@ -31,6 +34,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
     });
+    this._wordList = EASY_WORDS;
   }
 
   private _assignNewRoles(): void {
@@ -109,7 +113,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * Chooses a word for the drawer to draw from the appropriate list in the PictionaryDictionary based on the difficulty of the game.
    */
   private _chooseWord(): string {
-    return '';
+    let word = '';
+    while (word === '' || this.state.usedWords.includes(word)) {
+      const randomIndex = Math.floor(Math.random() * this._wordList.length);
+      word = this._wordList[randomIndex];
+    }
+    return word;
   }
 
   /**
@@ -147,6 +156,18 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         ...this.state,
         status: 'IN_PROGRESS',
       };
+    }
+  }
+
+  protected _startGame(): void {
+    const { difficulty } = this.state;
+    // get a random word from the PictionaryDictionary array based on the difficulty
+    if (difficulty === 'Medium') {
+      this._wordList = MEDIUM_WORDS;
+    } else if (difficulty === 'Hard') {
+      this._wordList = HARD_WORDS;
+    } else {
+      this._wordList = EASY_WORDS;
     }
   }
 
