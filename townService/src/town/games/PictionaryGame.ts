@@ -1,26 +1,13 @@
 import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
-  GAME_NOT_STARTABLE_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import {
-  GameMove,
-  PlayerID,
-  PictionaryTeamLetter,
-  PictionaryWordDifficulty,
-  PictionaryTeam,
-  PictionaryGameState,
-  PictionaryMove,
-} from '../../types/CoveyTownSocket';
+import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
 import Game from './Game';
-
-function getOtherTeamLetter(letter: PictionaryTeamLetter): PictionaryTeamLetter {
-  return letter === 'A' ? 'B' : 'A';
-}
 
 const ROUND_TIME = 60; // seconds
 
