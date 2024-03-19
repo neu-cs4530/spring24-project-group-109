@@ -1,7 +1,7 @@
 /*
  * Dictionary for the Pictionary game. Contains easy, medium and hard words.
  */
-const EASY_WORDS = [
+export const EASY_WORDS = [
   'apple',
   'banana',
   'cat',
@@ -57,7 +57,7 @@ const EASY_WORDS = [
   'grapes',
   'donut',
 ];
-const MEDIUM_WORDS = [
+export const MEDIUM_WORDS = [
   'goat',
   'dolphin',
   'apple pie',
@@ -110,7 +110,7 @@ const MEDIUM_WORDS = [
   'money',
   'couch',
 ];
-const HARD_WORDS = [
+export const HARD_WORDS = [
   'chimpanzee',
   'flamingo',
   'giraffe',
