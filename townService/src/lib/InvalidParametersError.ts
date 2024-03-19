@@ -17,6 +17,7 @@ export const PLAYER_ALREADY_IN_GAME_MESSAGE = 'Player is already in this game';
 
 export const INVALID_DRAWER_MESSAGE = 'Player is not the drawer';
 export const INVALID_DRAW_MESSAGE = 'Drawing is out of bounds';
+export const INVALID_BOARD_MESSAGE = 'Board is not initialized';
 export default class InvalidParametersError extends Error {
   public message: string;
 
