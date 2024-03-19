@@ -17,7 +17,7 @@ export type TownJoinResponse = {
   interactables: TypedInteractable[];
 }
 
-export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'PictionaryArea';
+export type InteractableType = 'ConversationArea' | 'ViewingArea' | 'TicTacToeArea' | 'ConnectFourArea' | 'PictionaryArea' | 'WhiteBoardArea';
 export interface Interactable {
   type: InteractableType;
   id: InteractableID;
@@ -183,11 +183,11 @@ export interface PictionaryGameState extends WinnableGameState {
   guesser?: PlayerID;
   word?: string;
   difficulty?: PictionaryWordDifficulty;
-  teamA?: PictionaryTeam;
-  teamB?: PictionaryTeam;
+  teamA: PictionaryTeam;
+  teamB: PictionaryTeam;
   teamAReady?: boolean;
   teamBReady?: boolean;
-  usedWords?: string[];
+  usedWords: string[];
   timer: number;
   round: number;
 }
@@ -196,10 +196,18 @@ export interface PictionaryGameState extends WinnableGameState {
  * Type for a team in Pictionary
  */
 export interface PictionaryTeam {
-  team: PictionaryTeamLetter;
+  letter: PictionaryTeamLetter;
   players: PlayerID[];
   score: number; 
 
+}
+
+export type Color = `#${string}`;
+
+export interface Pixel {
+  x: number;
+  y: number;
+  color: Color;
 }
 
 /**
@@ -254,7 +262,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | ResetCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -275,11 +283,30 @@ export interface GameMoveCommand<MoveType> {
   gameID: GameInstanceID;
   move: MoveType;
 }
+
+//TODO: Add more commands as needed
+export interface DrawCommand {
+  type: 'DrawCommand';
+  drawing: Pixel[];
+}
+
+export interface EraseCommand {
+  type: 'EraseCommand';
+  drawing: Pixel[];
+}
+
+export interface ResetCommand {
+  type: 'ResetCommand';
+}
+
 export type InteractableCommandReturnType<CommandType extends InteractableCommand> = 
   CommandType extends JoinGameCommand ? { gameID: string}:
   CommandType extends ViewingAreaUpdateCommand ? undefined :
   CommandType extends GameMoveCommand<TicTacToeMove> ? undefined :
   CommandType extends LeaveGameCommand ? undefined :
+  CommandType extends DrawCommand ? undefined :
+  CommandType extends EraseCommand ? undefined :
+  CommandType extends ResetCommand ? undefined :
   never;
 
 export type InteractableCommandResponse<MessageType> = {
