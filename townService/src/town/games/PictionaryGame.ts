@@ -87,14 +87,14 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
-    if (move.playerID !== this.state.guesser) {
-      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
-    }
     if (
       !this.state.teamA.players.includes(move.playerID) &&
       !this.state.teamB.players.includes(move.playerID)
     ) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
+    }
+    if (move.playerID !== this.state.guesser) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
     // correct guess case
     if (guess.guess.toLowerCase() === this.state.word?.toLowerCase()) {
