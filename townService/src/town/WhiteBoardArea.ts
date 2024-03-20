@@ -1,4 +1,5 @@
 import WhiteBoardModel from './WhiteBoardModel';
+import PictionaryGame from './games/PictionaryGame';
 import {
   DrawCommand,
   EraseCommand,
@@ -29,9 +30,9 @@ export default class WhiteBoardArea extends WhiteBoardModel {
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
     player: Player,
+    game: PictionaryGame,
   ): InteractableCommandReturnType<CommandType> {
-    if (player.id === '0' && this.board) {
-      // ToDo : Add player Drawer check
+    if (player.id === game.state.drawer) {
       if (command.type === 'DrawCommand') {
         const drawCommand = command as DrawCommand;
         const { board } = this;
@@ -58,9 +59,7 @@ export default class WhiteBoardArea extends WhiteBoardModel {
         this.reset();
         return undefined as InteractableCommandReturnType<CommandType>;
       }
-
-      throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
     }
-    return undefined as InteractableCommandReturnType<CommandType>;
+    throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
   }
 }
