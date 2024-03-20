@@ -284,7 +284,7 @@ export interface GameMoveCommand<MoveType> {
   move: MoveType;
 }
 
-//TODO: Add more commands as needed
+// TODO: Add more commands as needed
 export interface DrawCommand {
   type: 'DrawCommand';
   drawing: Pixel[];
