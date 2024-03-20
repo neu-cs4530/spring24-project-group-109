@@ -22,10 +22,19 @@ export default class WhiteBoardArea extends WhiteBoardModel {
   }
 
   /**
-   * Handle a given command.
+   * Handles a given command from a player in the game.
+   * Supported commands:
+   * - DrawCommand (displays the given drawing that the player drew)
+   * - EraseCommand (erases part of the drawing that the player drew)
+   * - ResetCommand (resets the drawing on the whiteboard to a blank state)
+   *
+   * - If the player is the drawer, the command is executed.
+   * - If the player is not the drawer, an InvalidParametersError is thrown.
+   *
    * @param command The command to be handled.
    * @param player The player who issued the command.
-   * @returns void
+   * @returns response to command
+   * @throws InvalidParametersError if the player is not the drawer or the board is not initialized.
    */
   public handleCommand<CommandType extends InteractableCommand>(
     command: CommandType,
