@@ -38,15 +38,15 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _assignNewRoles(): void {
-    const team = this.state.round % 2 === 1 ? this.state.teamA : this.state.teamB;
-    if (this.state.round <= 2) {
+    const team = this.state.round % 2 === 0 ? this.state.teamA : this.state.teamB;
+    if (this.state.round <= 1) {
       this.state = {
         ...this.state,
         drawer: team.players[0],
         guesser: team.players[1],
       };
     }
-    if (this.state.round > 2) {
+    if (this.state.round > 1) {
       this.state = {
         ...this.state,
         drawer: team.players[1],
@@ -60,7 +60,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the game is not full (GAME_NOT_STARTABLE_MESSAGE)
    */
   public tickDown(): void {
-    if (this.state.round === 5) {
+    if (this.state.round === 4) {
       this.state = { ...this.state, status: 'OVER' };
     } else if (this.state.status === 'IN_PROGRESS') {
       if (this.state.timer > 0) {
@@ -87,25 +87,35 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
-    if (move.playerID !== this.state.guesser) {
-      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
-    }
     if (
       !this.state.teamA.players.includes(move.playerID) &&
       !this.state.teamB.players.includes(move.playerID)
     ) {
       throw new InvalidParametersError(PLAYER_NOT_IN_GAME_MESSAGE);
     }
+    if (move.playerID !== this.state.guesser) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    }
     // correct guess case
     if (guess.guess.toLowerCase() === this.state.word?.toLowerCase()) {
       const team = this.state.drawer ? this.state.teamA : this.state.teamB;
-      this.state = {
-        ...this.state,
-        status: 'IN_PROGRESS',
-        [team.letter]: { ...team, score: team.score + 1 },
-        usedWords: [...this.state.usedWords, this.state.word],
-        word: this._chooseWord(),
-      };
+      if (team === this.state.teamA) {
+        this.state = {
+          ...this.state,
+          status: 'IN_PROGRESS',
+          teamA: { ...team, score: team.score + 1 },
+          usedWords: [...this.state.usedWords, this.state.word],
+          word: this._chooseWord(),
+        };
+      } else {
+        this.state = {
+          ...this.state,
+          status: 'IN_PROGRESS',
+          teamB: { ...team, score: team.score + 1 },
+          usedWords: [...this.state.usedWords, this.state.word],
+          word: this._chooseWord(),
+        };
+      }
     }
   }
 
@@ -150,8 +160,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-
-    if (teamAPlayers.length === 2 && teamBPlayers.length === 2) {
+    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
         status: 'IN_PROGRESS',
