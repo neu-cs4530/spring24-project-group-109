@@ -244,8 +244,8 @@ describe('PictionaryGame', () => {
         // should not need the line below... state does not change in join game
         expect(game.state.status).toEqual('IN_PROGRESS');
       });
-      it('ends the game if the round is equal to 5', () => {
-        game.state.round = 5;
+      it('ends the game if the round is equal to 4', () => {
+        game.state.round = 4;
         game.tickDown();
         expect(game.state.status).toEqual('OVER');
       });
