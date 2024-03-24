@@ -7,6 +7,7 @@ import InvalidParametersError, {
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
+import WhiteBoardArea from '../WhiteBoardArea';
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
@@ -33,6 +34,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       timer: ROUND_TIME, // seconds
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
+      board: new WhiteBoardArea(),
     });
     this._wordList = EASY_WORDS;
   }

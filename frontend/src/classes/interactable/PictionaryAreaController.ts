@@ -1,9 +1,12 @@
 import _ from 'lodash';
 import {
+    Color,
     GameArea,
     GameStatus,
+    InteractableCommand,
     PictionaryGameState,
     PictionaryMove,
+    Pixel,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import GameAreaController, {
@@ -116,6 +119,41 @@ export default class PictionaryAreaController extends GameAreaController<
     public getTeamBScore(): number {
         return this._model.game?.state.teamB.score ?? 0;
     }
+
+    get board(): Color[][] {
+        return this._model.game?.state.board.board;
+    }
+
+    /**
+     * Sends a request to the server to draw a pixel which makes up a drawing
+     * @param drawing list of pixels to draw
+     */
+    public async draw(drawing: Pixel[]) {
+        await this._sendInteractableCommandHelper({
+            type: 'DrawCommand',
+            drawing,
+        });
+    }
+
+    /**
+     * Sends a request to the server to erase a drawing on the whiteboard
+     * @param drawing list of pixels that need to be erased
+     */
+    public async erase(drawing: Pixel[]) {
+        await this._sendInteractableCommandHelper({
+            type: 'EraseCommand',
+            drawing,
+        });
+    }
+
+    /**
+     * Sends a request to the server to reset the whiteboard
+     */
+    public async reset() {
+        await this._sendInteractableCommandHelper({
+            type: 'ResetCommand',
+        });
+    }
     
     /**
      * Updates the internal state of this PictionaryAreaController to match the new model.
@@ -152,5 +190,17 @@ export default class PictionaryAreaController extends GameAreaController<
                 guess: word,
             }
         });
+    }
+
+    private async _sendInteractableCommandHelper(command: InteractableCommand) {
+        const instanceID = this._instanceID;
+        if (instanceID) {
+            await this._townController.sendInteractableCommand(this.id, {
+                gameID: instanceID,
+                ...command,
+            });
+        } else {
+            throw new Error('No instance ID yet');
+        }
     }
 }
