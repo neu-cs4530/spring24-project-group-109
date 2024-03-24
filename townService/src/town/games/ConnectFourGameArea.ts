@@ -85,6 +85,9 @@ export default class ConnectFourGameArea extends GameArea<ConnectFourGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
+      if (!('gamePiece' in command.move)) {
+        throw new InvalidParametersError('Invalid game piece');
+      }
       if (command.move.gamePiece !== 'Red' && command.move.gamePiece !== 'Yellow') {
         throw new InvalidParametersError('Invalid game piece');
       }
