@@ -116,7 +116,7 @@ export default abstract class GameAreaController<
       this._players.length != newModel.game?.players.length ||
       _.xor(newPlayers, this._players).length > 0
     ) {
-      this._players = newPlayers;
+      this._players = newPlayers.filter((player): player is PlayerController => player !== undefined);
       //TODO - Bounty for figuring out how to make the types work here
       //eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
