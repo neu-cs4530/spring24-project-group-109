@@ -15,10 +15,10 @@ export default class WhiteBoardModel {
   }
 
   /**
-   * Draw a given drawing on the whiteboard.
+   * Draws a given drawing on the whiteboard. The drawing is a list of pixels.
    * @param drawing The drawing to be drawn on the whiteboard.
    * @throws InvalidParametersError if the drawing is out of bounds.
-   * @returns void
+   * @returns void and updates the whiteboard.
    */
   public draw(drawing: Pixel[]): void {
     drawing.forEach((pixel: Pixel) => {
@@ -37,10 +37,10 @@ export default class WhiteBoardModel {
   }
 
   /**
-   * Erase a given drawing on the whiteboard.
+   * Erase a given drawing on the whiteboard. The drawing is a list of pixels.
    * @param drawing The drawing to be erased on the whiteboard.
    * @throws InvalidParametersError if the drawing is out of bounds.
-   * @returns void
+   * @returns void and updates the whiteboard.
    */
   public erase(drawing: Pixel[]): void {
     drawing.forEach((pixel: Pixel) => {
