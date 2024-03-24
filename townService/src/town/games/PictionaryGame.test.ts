@@ -259,8 +259,6 @@ describe('PictionaryGame', () => {
         game.state.round = 1;
         game.state.drawer = player1.id;
         game.state.guesser = player2.id;
-        console.log('player 1', player1.id);
-        console.log('player 2', player2.id);
         game.tickDown();
         expect(game.state.round).toEqual(2);
         expect(game.state.drawer).toEqual(player2.id);
