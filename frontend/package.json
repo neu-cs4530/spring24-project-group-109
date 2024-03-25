@@ -93,6 +93,7 @@
     "@testing-library/user-event": "^14.2.1",
     "@types/assert": "^1.5.10",
     "@types/linkify-it": "^3.0.2",
+    "@types/lodash": "^4.17.0",
     "@types/node": "^20.11.30",
     "@typescript-eslint/eslint-plugin": "^5.30.6",
     "eslint-config-airbnb-typescript": "^17.0.0",

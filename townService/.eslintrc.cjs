@@ -1,3 +1,5 @@
+const { endOfLine } = require("./.prettierrc.cjs")
+
 module.exports = {
   plugins: ['prettier', 'import', 'react'],
   root: true,
@@ -15,7 +17,12 @@ module.exports = {
   },
   ignorePatterns: ['/*.*'],
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': [
+      'error',
+    {
+      "endOfLine": "auto",
+    },
+    ],
     'no-underscore-dangle': 0,
     'no-param-reassign': 0,
     'no-restricted-syntax': 0,
