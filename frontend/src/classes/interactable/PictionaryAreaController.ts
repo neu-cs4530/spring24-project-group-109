@@ -135,6 +135,15 @@ export default class PictionaryAreaController extends GameAreaController<
         });
     }
 
+    // TODO: IMPLEMENT WAITING TO START???
+    get status(): GameStatus {
+        const status = this._model.game?.state.status;
+        if (!status) {
+            return 'WAITING_FOR_PLAYERS';
+        }
+        return status;
+    }
+
     /**
      * Sends a request to the server to erase a drawing on the whiteboard
      * @param drawing list of pixels that need to be erased
@@ -159,7 +168,51 @@ export default class PictionaryAreaController extends GameAreaController<
      * Updates the internal state of this PictionaryAreaController to match the new model.
      */
     protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
-        // not implemented
+        const oldModel = this._model;
+        super._updateFrom(newModel);
+        if(newModel) {
+            // if board has changed (ex. new drawing)
+            if (oldModel.game?.state.board.board !== newModel.game?.state.board.board) {
+                this.emit('boardChanged', this.board);
+            }
+            // drawer has changed
+            // is basically also checking isOurTurn
+            if (oldModel.game?.state.drawer !== newModel.game?.state.drawer) {
+                this.emit('drawerChanged', this.getDrawer());
+            }
+            // guesser has changed
+            // is basically also checking isOurTurn
+            if (oldModel.game?.state.guesser !== newModel.game?.state.guesser) {
+                this.emit('guesserChanged', this.getGuesser());
+            }
+            // word to guess has changed
+            if (oldModel.game?.state.word !== newModel.game?.state.word) {
+                this.emit('wordChanged', this.getWord());
+            }
+            // a word has been added to the used words in the game
+            if (oldModel.game?.state.usedWords !== newModel.game?.state.usedWords) {
+                this.emit('usedWordsChanged', this.getUsedWords());
+            }
+            // timer has changed
+            if (oldModel.game?.state.timer !== newModel.game?.state.timer) {
+                this.emit('timerChanged', this.getTimer());
+            }
+            // round has changed
+            if (oldModel.game?.state.round !== newModel.game?.state.round) {
+                this.emit('roundChanged', this.getRound());
+            }
+            // check if team A scored
+            if (oldModel.game?.state.teamA.score !== newModel.game?.state.teamA.score) {
+                this.emit('teamAScoreChanged', this.getTeamAScore());
+            }
+            // check if team B scored
+            if (oldModel.game?.state.teamB.score !== newModel.game?.state.teamB.score) {
+                this.emit('teamBScoreChanged', this.getTeamBScore());
+            }
+
+        }
+        
+
     }
 
     /**
