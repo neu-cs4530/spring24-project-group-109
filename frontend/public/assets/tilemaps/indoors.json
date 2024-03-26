@@ -621,6 +621,23 @@
                  "width":1.33529176124966,
                  "x":3296.83535852584,
                  "y":1068.23340899987
+                },
+                {
+                 "height":40,
+                 "id":50,
+                 "name":"Pictionary 1",
+                 "properties": [
+                        {   
+                         "name":"type",
+                         "type":"string",
+                         "value":"Pictionary"
+                        }],
+                 "rotation":0,
+                 "type":"GameArea",
+                 "visible":true,
+                 "width":125,
+                 "x":1598.99983333333,
+                 "y":800
                 }],
          "opacity":1,
          "type":"objectgroup",
