@@ -191,6 +191,7 @@ export interface PictionaryGameState extends WinnableGameState {
   timer: number;
   round: number;
   board: WhiteBoardArea;
+  guess?: string;
 }
 
 /**

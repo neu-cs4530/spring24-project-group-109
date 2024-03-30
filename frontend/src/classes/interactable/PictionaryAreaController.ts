@@ -46,6 +46,14 @@ export default class PictionaryAreaController extends GameAreaController<
         return undefined;
     }
 
+    public getTeam() {
+        if(this.getDrawer()?.id === this._model.game?.state.teamA.players[0]) {
+            return 'A';
+        } else {
+            return 'B';
+        }
+    }
+
     /**
      * Returns the player who is guessing
      */
@@ -63,6 +71,18 @@ export default class PictionaryAreaController extends GameAreaController<
     public getWord(): string {
         return this._model.game?.state.word ?? '';
     }
+
+    public getGuess(): string {
+        return this._model.game?.state.guess ?? '';
+    }
+
+    get winner(): PlayerController | undefined {
+        const winner = this._model.game?.state.winner;
+        if (winner) {
+          return this.occupants.find(eachOccupant => eachOccupant.id === winner);
+        }
+        return undefined;
+      }
 
     /**
      * Returns the current difficulty of the game
@@ -120,8 +140,26 @@ export default class PictionaryAreaController extends GameAreaController<
         return this._model.game?.state.teamB.score ?? 0;
     }
 
+    public getTeamAPlayers(): string[] {
+        return this._model.game?.state.teamA.players ?? []
+    }
+
+    public getTeamBPlayers(): string[] {
+        return this._model.game?.state.teamB.players ?? []
+    }
+
     get board(): Color[][] {
         return this._model.game?.state.board.board;
+    }
+
+    public async startGame(difficulty: string) {
+        const instanceID = this._instanceID;
+        if (instanceID) {
+          await this._townController.sendInteractableCommand(this.id, {
+            type: 'StartGame',
+            gameID: instanceID,
+          });
+        }
     }
 
     /**
@@ -129,10 +167,10 @@ export default class PictionaryAreaController extends GameAreaController<
      * @param drawing list of pixels to draw
      */
     public async draw(drawing: Pixel[]) {
-        await this._sendInteractableCommandHelper({
-            type: 'DrawCommand',
-            drawing,
-        });
+            await this._sendInteractableCommandHelper({
+                    type: 'DrawCommand',
+                    drawing,
+            });
     }
 
     // TODO: IMPLEMENT WAITING TO START???

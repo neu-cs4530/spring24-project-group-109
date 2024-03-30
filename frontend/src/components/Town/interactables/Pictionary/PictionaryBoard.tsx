@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import useTownController from '../../../../hooks/useTownController';
 import { Color } from '../../../../types/CoveyTownSocket';
-import { PictionaryColorOptions, PictionaryColorOptionsType } from './PictionaryBoardContext';
+import pictionaryColorOptions, { PictionaryColorOptionsType } from './PictionaryBoardContext';
 
 // TODO: MAKE A CONSTANTS FILE FOR THESE
 const WHITEBOARD_HEIGHT = 10;
@@ -34,7 +34,7 @@ export default function PictionaryBoard({
   const townController = useTownController();
   const [board, setBoard] = useState<Color[][]>(pictionaryAreaController.board);
   const [shouldDraw, setShouldDraw] = useState<boolean>(false);
-  const { color } = useContext(PictionaryColorOptions) as PictionaryColorOptionsType;
+  const { color } = useContext(pictionaryColorOptions) as PictionaryColorOptionsType;
 
   const handleBoardChanges = (newBoard: Color[][]) => {
     setBoard(newBoard);
@@ -62,7 +62,7 @@ export default function PictionaryBoard({
                   <td
                     key={rowIndex * WHITEBOARD_WIDTH + colIndex}
                     style={{
-                      width: 10, // MIGHT NEED TO MAKE WHITEBOARD PIXEL
+                      width: 10, // TODO: MIGHT NEED TO MAKE WHITEBOARD PIXEL
                       height: 10,
                       backgroundColor: board[rowIndex][colIndex],
                     }}

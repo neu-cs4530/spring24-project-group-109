@@ -25,7 +25,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       drawer: undefined,
       guesser: undefined,
       word: undefined,
-      difficulty: 'Easy', // Default difficulty
+      difficulty: undefined, // Default difficulty as 'Easy' (Ashna edit: there should not be a default so the game doesn't auto start)
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       teamAReady: false,
@@ -35,6 +35,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
       board: new WhiteBoardArea(),
+      guess: undefined,
     });
     this._wordList = EASY_WORDS;
   }
@@ -86,6 +87,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public applyMove(move: GameMove<PictionaryMove>): void {
     const guess: PictionaryMove = move.move;
+    this.state.guess = move.move.guess;
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
@@ -170,16 +172,17 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
   }
 
-  protected _startGame(): void {
-    const { difficulty } = this.state;
+  protected _startGame(difficulty: string): void {
+    // const { difficulty } = this.state;
     // get a random word from the PictionaryDictionary array based on the difficulty
-    if (difficulty === 'Medium') {
+    if (difficulty === 'Easy') {
+      this._wordList = EASY_WORDS;
+    } else if (difficulty === 'Medium') {
       this._wordList = MEDIUM_WORDS;
     } else if (difficulty === 'Hard') {
       this._wordList = HARD_WORDS;
-    } else {
-      this._wordList = EASY_WORDS;
     }
+    this._assignNewRoles();
   }
 
   /**
