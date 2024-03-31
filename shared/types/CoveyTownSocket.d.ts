@@ -204,8 +204,14 @@ export interface PictionaryTeam {
 
 }
 
+/**
+ * Type of `color` in a Pixel
+ */
 export type Color = `#${string}`;
 
+/**
+ * Type for a pixel in a drawing
+ */
 export interface Pixel {
   x: number;
   y: number;
@@ -286,7 +292,6 @@ export interface GameMoveCommand<MoveType> {
   move: MoveType;
 }
 
-// TODO: Add more commands as needed
 export interface DrawCommand {
   type: 'DrawCommand';
   drawing: Pixel[];
