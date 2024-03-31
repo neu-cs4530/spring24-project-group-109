@@ -81,6 +81,9 @@ export default class TicTacToeGameArea extends GameArea<TicTacToeGame> {
       if (this._game?.id !== command.gameID) {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
+      if (!('gamePiece' in command.move)) {
+        throw new InvalidParametersError('Invalid game piece');
+      }
       assert(
         command.move.gamePiece === 'X' || command.move.gamePiece === 'O',
         'Invalid game piece',
