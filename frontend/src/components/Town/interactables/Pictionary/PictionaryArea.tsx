@@ -7,8 +7,8 @@ import PlayerController from '../../../../classes/PlayerController';
 import { Button, Container, Flex, Heading, Input, useToast } from '@chakra-ui/react';
 import pictionaryColorOptions from './PictionaryBoardContext';
 import PictionaryBoard from './PictionaryBoard';
-import PictionaryColor from './PictionaryColor';
 import PictionaryButtons from './PictionaryButtons';
+import PictionaryColor from './PictionaryColor';
 
 function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   const pictionaryAreaController =
