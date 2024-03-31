@@ -205,7 +205,7 @@ export interface PictionaryTeam {
 }
 
 /**
- * Type of `color` in a Pixel
+ * Type of `color` in a Pixel. Given in hex format, e.g. `#FF0000` for red.
  */
 export type Color = `#${string}`;
 
