@@ -190,6 +190,8 @@ export interface PictionaryGameState extends WinnableGameState {
   usedWords: string[];
   timer: number;
   round: number;
+  board: WhiteBoardArea;
+  guess?: string;
 }
 
 /**
@@ -284,7 +286,7 @@ export interface GameMoveCommand<MoveType> {
   move: MoveType;
 }
 
-//TODO: Add more commands as needed
+// TODO: Add more commands as needed
 export interface DrawCommand {
   type: 'DrawCommand';
   drawing: Pixel[];
