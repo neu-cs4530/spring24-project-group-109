@@ -25,9 +25,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   const [color, setColor] = useState<Color>('#000000');
   const [history, setHistory] = useState<GameResult[]>(pictionaryAreaController.history);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  const [observers, setObservers] = useState<PlayerController[]>(
-    pictionaryAreaController.observers,
-  );
+  //   const [observers, setObservers] = useState<PlayerController[]>(
+  //     pictionaryAreaController.observers,
+  //   );
+  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer);
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
@@ -37,9 +38,11 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     const updateGameState = () => {
       setHistory(pictionaryAreaController.history);
       setGameStatus(pictionaryAreaController.status);
-      setObservers(pictionaryAreaController.observers);
+      // setObservers(pictionaryAreaController.observers);
       setDrawer(pictionaryAreaController.getDrawer);
       setGuesser(pictionaryAreaController.getGuesser);
+      setWord(pictionaryAreaController.getWord);
+      setTimer(pictionaryAreaController.getTimer);
     };
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = () => {
@@ -71,159 +74,158 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     };
   }, [townController, pictionaryAreaController, toast]);
 
-  let gameStatusText = <></>;
+  const gameStatusTextPlayers = (
+    <>
+      Game in {'WAITING_FOR_PLAYERS'}, teamA:{pictionaryAreaController.getTeamAPlayers}, teamB:
+      {pictionaryAreaController.getTeamBPlayers}
+      {pictionaryAreaController.getTeam}
+    </>
+  );
+  const gameStatusTextScore = (
+    <>
+      Game in progress, round: {pictionaryAreaController.getRound}, currently:{' '}
+      {pictionaryAreaController.getTeam} turn, Team A score:{' '}
+      {pictionaryAreaController.getTeamAScore}, Team B score:{' '}
+      {pictionaryAreaController.getTeamBScore}
+    </>
+  );
   if (gameStatus === 'IN_PROGRESS') {
-    let leaveButton = <></>;
-    gameStatusText = (
-      <>
-        Game in progress, round: {pictionaryAreaController.getRound}, currently:{' '}
-        {pictionaryAreaController.getTeam} turn, Team A score:{' '}
-        {pictionaryAreaController.getTeamAScore}, Team B score:{' '}
-        {pictionaryAreaController.getTeamBScore}
-      </>
-    );
-    leaveButton = (
-      <Button
-        type='button'
-        onClick={async () => {
-          setLeavingGame(true);
-          await pictionaryAreaController.leaveGame();
-          setLeavingGame(false);
-        }}
-        isLoading={leavingGame}
-        disabled={leavingGame}>
-        Leave Game
-      </Button>
-    );
+    // HOLD
   } else {
-    let easyButton = <></>;
-    let mediumButton = <></>;
-    let hardButton = <></>;
-    let joinGameButton = <></>;
+    // let joinGameButton = <></>;
     if (
       pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' &&
       !pictionaryAreaController.isPlayer
     ) {
-      joinGameButton = (
-        <Button
-          type='button'
-          onClick={async () => {
-            setJoiningGame(true);
-            try {
-              await pictionaryAreaController.joinGame();
-            } catch (err) {
-              toast({
-                title: 'Error joining game',
-                description: (err as Error).toString(),
-                status: 'error',
-              });
-            }
-            setJoiningGame(false);
-          }}
-          isLoading={joiningGame}
-          disabled={joiningGame}>
-          Join Game
-        </Button>
-      );
-    } else {
-      gameStatusText = (
-        <>
-          Game in {'WAITING_FOR_PLAYERS'}, teamA:{pictionaryAreaController.getTeamAPlayers}, teamB:
-          {pictionaryAreaController.getTeamBPlayers}
-          {pictionaryAreaController.getTeam}
-        </>
-      );
-      easyButton = (
-        <Button
-          type='button'
-          onClick={async () => {
-            setStartingGame(true);
-            await pictionaryAreaController.startGame('Easy');
-            setStartingGame(false);
-          }}
-          isLoading={startingGame}
-          disabled={startingGame}>
-          Start Easy Game
-        </Button>
-      );
-      mediumButton = (
-        <Button
-          type='button'
-          onClick={async () => {
-            setStartingGame(true);
-            await pictionaryAreaController.startGame('Medium');
-            setStartingGame(false);
-          }}
-          isLoading={startingGame}
-          disabled={startingGame}>
-          Start Medium Game
-        </Button>
-      );
-      hardButton = (
-        <Button
-          type='button'
-          onClick={async () => {
-            setStartingGame(true);
-            await pictionaryAreaController.startGame('Hard');
-            setStartingGame(false);
-          }}
-          isLoading={startingGame}
-          disabled={startingGame}>
-          Start Hard Game
-        </Button>
-      );
+      //   joinGameButton = (
+      //     <Button
+      //       type='button'
+      //       onClick={async () => {
+      //         setJoiningGame(true);
+      //         try {
+      //           await pictionaryAreaController.joinGame();
+      //         } catch (err) {
+      //           toast({
+      //             title: 'Error joining game',
+      //             description: (err as Error).toString(),
+      //             status: 'error',
+      //           });
+      //         }
+      //         setJoiningGame(false);
+      //       }}
+      //       isLoading={joiningGame}
+      //       disabled={joiningGame}>
+      //       Join Game
+      //     </Button>
+      //   );
     }
   }
   return (
-    // TODO: FIGURE OUT WHAT THE COLUMN THINGS IS
-    <pictionaryColorOptions.Provider value={{ color, setColor }}>
-      <Flex flexDirection='row'>
-        <Container flexDirection='column'>
-          <Heading as='h4'>{pictionaryAreaController.getDrawer() ? `${word}` : ''}</Heading>
-          <PictionaryBoard pictionaryAreaController={pictionaryAreaController}></PictionaryBoard>
-          <Flex flexDirection='row'>
-            <PictionaryColor></PictionaryColor>
-            <PictionaryButtons
-              pictionaryAreaController={pictionaryAreaController}></PictionaryButtons>
-          </Flex>
-        </Container>
-
-        <Container flexDirection='column'>
-          <Input
-            placeholder='Guess'
-            value={guess}
-            onChange={event => setGuess(event.target.value)}
-          />
+    // TODO PUT EMH BUTTONS IN COLUMNS
+    <Heading as='h4'>
+      {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
+        <Flex flexDirection='row'>
+          {gameStatusTextPlayers}
           <Button
+            type='button'
             onClick={async () => {
-              try {
-                await pictionaryAreaController.makeMove(guess).then(() => {
-                  setGuess('');
-                  if (guess == word) {
-                    toast({
-                      title: 'Correct Guess!',
-                      description: 'You guessed the word!',
-                      status: 'success',
+              setStartingGame(true);
+              await pictionaryAreaController.startGame('Easy');
+              setStartingGame(false);
+            }}
+            isLoading={startingGame}
+            disabled={startingGame}>
+            Start Easy Game
+          </Button>
+          <Button
+            type='button'
+            onClick={async () => {
+              setStartingGame(true);
+              await pictionaryAreaController.startGame('Medium');
+              setStartingGame(false);
+            }}
+            isLoading={startingGame}
+            disabled={startingGame}>
+            Start Medium Game
+          </Button>
+          <Button
+            type='button'
+            onClick={async () => {
+              setStartingGame(true);
+              await pictionaryAreaController.startGame('Hard');
+              setStartingGame(false);
+            }}
+            isLoading={startingGame}
+            disabled={startingGame}>
+            Start Hard Game
+          </Button>
+        </Flex>
+      ) : (
+        <pictionaryColorOptions.Provider value={{ color, setColor }}>
+          <Flex flexDirection='row'>
+            {gameStatusTextScore}
+            {timer}
+            <Container flexDirection='column'>
+              <Heading as='h4'>{pictionaryAreaController.getDrawer() ? `${word}` : ''}</Heading>
+              <PictionaryBoard
+                pictionaryAreaController={pictionaryAreaController}></PictionaryBoard>
+              <Flex flexDirection='row'>
+                <PictionaryColor></PictionaryColor>
+                <PictionaryButtons
+                  pictionaryAreaController={pictionaryAreaController}></PictionaryButtons>
+              </Flex>
+            </Container>
+            <Container flexDirection='column'>
+              <Button
+                type='button'
+                onClick={async () => {
+                  setLeavingGame(true);
+                  await pictionaryAreaController.leaveGame();
+                  setLeavingGame(false);
+                }}
+                isLoading={leavingGame}
+                disabled={leavingGame}>
+                Leave Game
+              </Button>
+              <Input
+                placeholder='Guess'
+                value={guess}
+                onChange={event => setGuess(event.target.value)}
+              />
+              <Button
+                onClick={async () => {
+                  try {
+                    await pictionaryAreaController.makeMove(guess).then(() => {
+                      setGuess('');
+                      if (guess == word) {
+                        toast({
+                          title: 'Correct Guess!',
+                          description: 'You guessed the word!',
+                          status: 'success',
+                        });
+                      } else {
+                        toast({
+                          title: 'Incorrect Guess',
+                          description: 'Try again',
+                        });
+                      }
                     });
-                  } else {
+                  } catch (err) {
                     toast({
-                      title: 'Incorrect Guess',
-                      description: 'Try again',
+                      title: 'Error making move',
+                      description: (err as Error).toString(),
+                      status: 'error',
                     });
                   }
-                });
-              } catch (err) {
-                toast({
-                  title: 'Error making move',
-                  description: (err as Error).toString(),
-                  status: 'error',
-                });
-              }
-            }}>
-            Guess
-          </Button>
-        </Container>
-      </Flex>
-    </pictionaryColorOptions.Provider>
+                }}>
+                Guess
+              </Button>
+            </Container>
+          </Flex>
+        </pictionaryColorOptions.Provider>
+      )}
+    </Heading>
+    // TODO: FIGURE OUT WHAT THE COLUMN THINGS IS
   );
 }
+export default PictionaryArea;

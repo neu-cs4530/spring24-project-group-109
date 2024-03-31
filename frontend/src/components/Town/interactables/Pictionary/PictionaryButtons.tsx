@@ -14,18 +14,18 @@ function PictionaryButtons({ pictionaryAreaController }: PictionaryGameProps): J
     <>
       {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id &&
         (eraseButton = (
-          <Button>
+          <button>
             {color} = {`#${'FFFFFF'}`}
             Erase Button
-          </Button>
+          </button>
         )) &&
         (resetButton = (
-          <Button
+          <button
             onClick={async () => {
               await pictionaryAreaController.reset();
             }}>
             ResetButton
-          </Button>
+          </button>
         ))}
     </>
   );
