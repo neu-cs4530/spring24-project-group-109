@@ -22,6 +22,7 @@
     "homepage": "https://github.com/neu-se/covey.town#readme",
     "devDependencies": {
         "@types/jest": "^26.0.24",
+        "@types/react-color": "^3.0.12",
         "@typescript-eslint/eslint-plugin": "^4.8.1",
         "@typescript-eslint/parser": "^4.8.1",
         "eslint": "^7.13.0",
@@ -39,7 +40,7 @@
     },
     "dependencies": {
         "@types/ramda": "^0.27.34",
-        "lodash": "^4.17.21",
+        "jest-mock-extended": "^3.0.5",
         "nanoid": "^5.0.6",
         "ramda": "^0.27.1",
         "tsoa": "^6.1.3",
