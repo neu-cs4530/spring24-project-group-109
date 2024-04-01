@@ -1,11 +1,10 @@
-import _ from 'lodash';
 import {
   Color,
   GameArea,
   GameStatus,
   InteractableCommand,
   PictionaryGameState,
-  PictionaryMove,
+  PictionaryWordDifficulty,
   Pixel,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
@@ -45,6 +44,9 @@ export default class PictionaryAreaController extends GameAreaController<
     return undefined;
   }
 
+  /**
+   * Returns the team letter of the player who is drawing
+   */
   public getTeam() {
     if (this.getDrawer()?.id === this._model.game?.state.teamA.players[0]) {
       return 'A';
@@ -71,11 +73,17 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.word ?? '';
   }
 
+  /**
+   * Returns the current guess that the guesser has made
+   */
   public getGuess(): string {
     return this._model.game?.state.guess ?? '';
   }
 
-  get winner(): PlayerController | undefined {
+  /**
+   * Returns the player who has won the game
+   */
+  public winner(): PlayerController | undefined {
     const winner = this._model.game?.state.winner;
     if (winner) {
       return this.occupants.find(eachOccupant => eachOccupant.id === winner);
@@ -86,8 +94,8 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Returns the current difficulty of the game
    */
-  public getDifficulty(): string {
-    return this._model.game?.state.difficulty ?? '';
+  public getDifficulty(): PictionaryWordDifficulty {
+    return this._model.game?.state.difficulty ?? 'Easy';
   }
 
   /**
@@ -142,24 +150,38 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.teamB.score ?? 0;
   }
 
+  /**
+   * Returns players in team A
+   */
   public getTeamAPlayers(): string[] {
     return this._model.game?.state.teamA.players ?? [];
   }
 
+  /**
+   * Returns players in team B
+   */
   public getTeamBPlayers(): string[] {
     return this._model.game?.state.teamB.players ?? [];
   }
 
+  /**
+   * Returns the current board state
+   */
   get board(): Color[][] {
     return this._model.game?.state.board.board;
   }
 
-  public async startGame(difficulty: string) {
+  /**
+   * Starts the game based on the difficulty that the player chooses
+   * @param difficulty the game difficulty level
+   */
+  public async startGame(difficulty: PictionaryWordDifficulty) {
     const instanceID = this._instanceID;
     if (instanceID) {
       await this._townController.sendInteractableCommand(this.id, {
-        type: 'StartGame',
+        type: 'PictionaryStartGame',
         gameID: instanceID,
+        difficulty: difficulty,
       });
     }
   }
@@ -175,7 +197,9 @@ export default class PictionaryAreaController extends GameAreaController<
     });
   }
 
-  // TODO: IMPLEMENT WAITING TO START???
+  /**
+   * Returns the current status of the game
+   */
   get status(): GameStatus {
     const status = this._model.game?.state.status;
     if (!status) {
@@ -270,9 +294,6 @@ export default class PictionaryAreaController extends GameAreaController<
     if (!this.isPlayer()) {
       throw new Error(PLAYER_NOT_IN_GAME_ERROR);
     }
-    // const move: PictionaryMove = {
-    //     guess: word,
-    // };
     await this._townController.sendInteractableCommand(this.id, {
       type: 'GameMove',
       gameID: instanceID,
