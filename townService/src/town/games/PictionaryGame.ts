@@ -25,7 +25,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       drawer: undefined,
       guesser: undefined,
       word: undefined,
-      difficulty: undefined,
+      difficulty: 'Easy',
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       teamAReady: false,
@@ -173,7 +173,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   protected _startGame(difficulty: string): void {
-    // const { difficulty } = this.state;
     // get a random word from the PictionaryDictionary array based on the difficulty
     if (difficulty === 'Easy') {
       this._wordList = EASY_WORDS;
