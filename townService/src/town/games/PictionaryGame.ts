@@ -25,7 +25,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       drawer: undefined,
       guesser: undefined,
       word: undefined,
-      difficulty: undefined, // Default difficulty as 'Easy' (Ashna edit: there should not be a default so the game doesn't auto start)
+      difficulty: undefined,
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       teamAReady: false,
