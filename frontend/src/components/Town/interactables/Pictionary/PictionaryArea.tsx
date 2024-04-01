@@ -29,6 +29,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   //     pictionaryAreaController.observers,
   //   );
   const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer);
+  // TODO IMPLEMENT JOIN GAME SCREEN
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);

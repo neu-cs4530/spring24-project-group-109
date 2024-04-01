@@ -86,7 +86,7 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Returns the player who has won the game
    */
-  public winner(): PlayerController | undefined {
+  get winner(): PlayerController | undefined {
     const winner = this._model.game?.state.winner;
     if (winner) {
       return this.occupants.find(eachOccupant => eachOccupant.id === winner);
