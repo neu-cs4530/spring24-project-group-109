@@ -15,20 +15,20 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
   const [drawer, setDrawer] = useState<PlayerController | undefined>(
-    pictionaryAreaController.getDrawer,
+    pictionaryAreaController.getDrawer(),
   );
   const [guesser, setGuesser] = useState<PlayerController | undefined>(
-    pictionaryAreaController.getGuesser,
+    pictionaryAreaController.getGuesser(),
   );
-  const [word, setWord] = useState<string>(pictionaryAreaController.getWord);
-  const [guess, setGuess] = useState<string>(pictionaryAreaController.getGuess);
+  const [word, setWord] = useState<string>(pictionaryAreaController.getWord());
+  const [guess, setGuess] = useState<string>(pictionaryAreaController.getGuess());
   const [color, setColor] = useState<Color>('#000000');
   const [history, setHistory] = useState<GameResult[]>(pictionaryAreaController.history);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
   //   const [observers, setObservers] = useState<PlayerController[]>(
   //     pictionaryAreaController.observers,
   //   );
-  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer);
+  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
@@ -39,10 +39,10 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setHistory(pictionaryAreaController.history);
       setGameStatus(pictionaryAreaController.status);
       // setObservers(pictionaryAreaController.observers);
-      setDrawer(pictionaryAreaController.getDrawer);
-      setGuesser(pictionaryAreaController.getGuesser);
-      setWord(pictionaryAreaController.getWord);
-      setTimer(pictionaryAreaController.getTimer);
+      setDrawer(pictionaryAreaController.getDrawer());
+      setGuesser(pictionaryAreaController.getGuesser());
+      setWord(pictionaryAreaController.getWord());
+      setTimer(pictionaryAreaController.getTimer());
     };
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = () => {
@@ -76,17 +76,17 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
 
   const gameStatusTextPlayers = (
     <>
-      Game in {'WAITING_FOR_PLAYERS'}, teamA:{pictionaryAreaController.getTeamAPlayers}, teamB:
-      {pictionaryAreaController.getTeamBPlayers}
-      {pictionaryAreaController.getTeam}
+      Game in {'WAITING_FOR_PLAYERS'}, teamA:{pictionaryAreaController.getTeamAPlayers()}, teamB:
+      {pictionaryAreaController.getTeamBPlayers()}
+      {pictionaryAreaController.getTeam()}
     </>
   );
   const gameStatusTextScore = (
     <>
-      Game in progress, round: {pictionaryAreaController.getRound}, currently:{' '}
-      {pictionaryAreaController.getTeam} turn, Team A score:{' '}
-      {pictionaryAreaController.getTeamAScore}, Team B score:{' '}
-      {pictionaryAreaController.getTeamBScore}
+      Game in progress, round: {pictionaryAreaController.getRound()}, currently:{' '}
+      {pictionaryAreaController.getTeam()} turn, Team A score:{' '}
+      {pictionaryAreaController.getTeamAScore()}, Team B score:{' '}
+      {pictionaryAreaController.getTeamBScore()}
     </>
   );
   if (gameStatus === 'IN_PROGRESS') {
@@ -95,7 +95,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     // let joinGameButton = <></>;
     if (
       pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' &&
-      !pictionaryAreaController.isPlayer
+      !pictionaryAreaController.isPlayer()
     ) {
       //   joinGameButton = (
       //     <Button
