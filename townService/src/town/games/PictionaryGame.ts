@@ -6,7 +6,12 @@ import InvalidParametersError, {
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
+import {
+  GameMove,
+  PictionaryGameState,
+  PictionaryMove,
+  PictionaryWordDifficulty,
+} from '../../types/CoveyTownSocket';
 import WhiteBoardArea from '../WhiteBoardArea';
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
@@ -172,7 +177,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
   }
 
-  protected _startGame(difficulty: string): void {
+  /**
+   * Starts the game with the given difficulty.
+   * Updates the game's state to reflect the new game.
+   * @param difficulty The difficulty of the game
+   */
+  public startGame(difficulty: PictionaryWordDifficulty): void {
     // get a random word from the PictionaryDictionary array based on the difficulty
     if (difficulty === 'Easy') {
       this._wordList = EASY_WORDS;

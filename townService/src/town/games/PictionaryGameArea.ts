@@ -69,6 +69,15 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         return undefined as InteractableCommandReturnType<CommandType>;
       }
     }
+    if (command.type === 'PictionaryStartGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      game.startGame(command.difficulty);
+      this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
     if (command.type === 'JoinGame') {
       let game = this._game;
       if (!game || game.state.status === 'OVER') {
