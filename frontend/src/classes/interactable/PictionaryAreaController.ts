@@ -14,6 +14,9 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
+/**
+ * The type of the context that provides the Pictionary events
+ */
 export type PictionaryEvents = GameEventTypes & {
   wordChanged: (word: string) => void;
   turnChanged: (isOurTurn: boolean) => void;
