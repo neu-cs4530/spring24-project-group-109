@@ -29,7 +29,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
   //     pictionaryAreaController.observers,
   //   );
   const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer);
-  // TODO IMPLEMENT JOIN GAME SCREEN
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
@@ -90,41 +89,31 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       {pictionaryAreaController.getTeamBScore}
     </>
   );
-  if (gameStatus === 'IN_PROGRESS') {
-    // HOLD
-  } else {
-    // let joinGameButton = <></>;
-    if (
-      pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' &&
-      !pictionaryAreaController.isPlayer
-    ) {
-      //   joinGameButton = (
-      //     <Button
-      //       type='button'
-      //       onClick={async () => {
-      //         setJoiningGame(true);
-      //         try {
-      //           await pictionaryAreaController.joinGame();
-      //         } catch (err) {
-      //           toast({
-      //             title: 'Error joining game',
-      //             description: (err as Error).toString(),
-      //             status: 'error',
-      //           });
-      //         }
-      //         setJoiningGame(false);
-      //       }}
-      //       isLoading={joiningGame}
-      //       disabled={joiningGame}>
-      //       Join Game
-      //     </Button>
-      //   );
-    }
-  }
   return (
-    // TODO PUT EMH BUTTONS IN COLUMNS
+    // TODO PUT E/M/H BUTTONS IN COLUMNS
     <Heading as='h4'>
-      {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
+      {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' &&
+      !pictionaryAreaController.isPlayer ? (
+        <Button
+          type='button'
+          onClick={async () => {
+            setJoiningGame(true);
+            try {
+              await pictionaryAreaController.joinGame();
+            } catch (err) {
+              toast({
+                title: 'Error joining game',
+                description: (err as Error).toString(),
+                status: 'error',
+              });
+            }
+            setJoiningGame(false);
+          }}
+          isLoading={joiningGame}
+          disabled={joiningGame}>
+          Join Game
+        </Button>
+      ) : pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
         <Flex flexDirection='row'>
           {gameStatusTextPlayers}
           <Button

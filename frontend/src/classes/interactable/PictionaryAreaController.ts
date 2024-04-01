@@ -190,6 +190,19 @@ export default class PictionaryAreaController extends GameAreaController<
   }
 
   /**
+   * Allows a player to join the game
+   */
+  public async joinGame() {
+    const instanceID = this._instanceID;
+    if (instanceID) {
+      await this._townController.sendInteractableCommand(this.id, {
+        type: 'JoinGame',
+        gameID: instanceID,
+      });
+    }
+  }
+
+  /**
    * Sends a request to the server to draw a pixel which makes up a drawing
    * @param drawing list of pixels to draw
    */
