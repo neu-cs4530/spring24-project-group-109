@@ -13,7 +13,6 @@ import PictionaryButtons from './PictionaryButtons';
 function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
   const pictionaryAreaController =
     useInteractableAreaController<PictionaryAreaController>(interactableID);
-    console.log(pictionaryAreaController, "inside PictionaryArea");
   const townController = useTownController();
   const [drawer, setDrawer] = useState<PlayerController | undefined>(
     pictionaryAreaController.getDrawer(),
@@ -40,9 +39,7 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       setHistory(pictionaryAreaController.history);
       setGameStatus(pictionaryAreaController.status);
       // setObservers(pictionaryAreaController.observers);
-      console.log(pictionaryAreaController.getDrawer, "before setDrawer")
       setDrawer(pictionaryAreaController.getDrawer());
-      console.log(pictionaryAreaController.getGuesser, "after setDrawer")
       setGuesser(pictionaryAreaController.getGuesser());
       setWord(pictionaryAreaController.getWord());
       setTimer(pictionaryAreaController.getTimer());

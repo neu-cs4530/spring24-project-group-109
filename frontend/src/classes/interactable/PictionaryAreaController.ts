@@ -39,7 +39,6 @@ export default class PictionaryAreaController extends GameAreaController<
      * Returns the player who is drawing
      */
     public getDrawer(): PlayerController | undefined {
-        console.log(this)
         const drawer = this._model.game?.state.drawer;
         if (drawer) {
             return this._players.find(player => player.id === drawer);
