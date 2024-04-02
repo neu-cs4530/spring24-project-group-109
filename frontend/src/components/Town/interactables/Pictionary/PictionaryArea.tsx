@@ -90,7 +90,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     </>
   );
   return (
-    // TODO PUT E/M/H BUTTONS IN COLUMNS
     <Heading as='h4'>
       {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' &&
       !pictionaryAreaController.isPlayer ? (
@@ -116,39 +115,45 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       ) : pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
         <Flex flexDirection='row'>
           {gameStatusTextPlayers}
-          <Button
-            type='button'
-            onClick={async () => {
-              setStartingGame(true);
-              await pictionaryAreaController.startGame('Easy');
-              setStartingGame(false);
-            }}
-            isLoading={startingGame}
-            disabled={startingGame}>
-            Start Easy Game
-          </Button>
-          <Button
-            type='button'
-            onClick={async () => {
-              setStartingGame(true);
-              await pictionaryAreaController.startGame('Medium');
-              setStartingGame(false);
-            }}
-            isLoading={startingGame}
-            disabled={startingGame}>
-            Start Medium Game
-          </Button>
-          <Button
-            type='button'
-            onClick={async () => {
-              setStartingGame(true);
-              await pictionaryAreaController.startGame('Hard');
-              setStartingGame(false);
-            }}
-            isLoading={startingGame}
-            disabled={startingGame}>
-            Start Hard Game
-          </Button>
+          <Container flexDirection='column'>
+            <Button
+              type='button'
+              onClick={async () => {
+                setStartingGame(true);
+                await pictionaryAreaController.startGame('Easy');
+                setStartingGame(false);
+              }}
+              isLoading={startingGame}
+              disabled={startingGame}>
+              Start Easy Game
+            </Button>
+          </Container>
+          <Container flexDirection='column'>
+            <Button
+              type='button'
+              onClick={async () => {
+                setStartingGame(true);
+                await pictionaryAreaController.startGame('Medium');
+                setStartingGame(false);
+              }}
+              isLoading={startingGame}
+              disabled={startingGame}>
+              Start Medium Game
+            </Button>
+          </Container>
+          <Container flexDirection='column'>
+            <Button
+              type='button'
+              onClick={async () => {
+                setStartingGame(true);
+                await pictionaryAreaController.startGame('Hard');
+                setStartingGame(false);
+              }}
+              isLoading={startingGame}
+              disabled={startingGame}>
+              Start Hard Game
+            </Button>
+          </Container>
         </Flex>
       ) : (
         <pictionaryColorOptions.Provider value={{ color, setColor }}>
@@ -215,7 +220,6 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
         </pictionaryColorOptions.Provider>
       )}
     </Heading>
-    // TODO: FIGURE OUT WHAT THE COLUMN THINGS IS
   );
 }
 export default PictionaryArea;
