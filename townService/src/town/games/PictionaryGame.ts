@@ -1,6 +1,7 @@
 import InvalidParametersError, {
   GAME_FULL_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  GAME_NOT_STARTABLE_MESSAGE,
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
@@ -167,12 +168,15 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
-        status: 'IN_PROGRESS',
+        status: 'WAITING_TO_START',
       };
     }
   }
 
-  protected _startGame(difficulty: string): void {
+  public startGame(difficulty: string): void {
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
+    }
     // const { difficulty } = this.state;
     // get a random word from the PictionaryDictionary array based on the difficulty
     if (difficulty === 'Easy') {
