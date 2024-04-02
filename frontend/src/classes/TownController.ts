@@ -32,6 +32,7 @@ import {
   isConversationArea,
   isTicTacToeArea,
   isViewingArea,
+  isPictionaryArea,
 } from '../types/TypeUtils';
 import ConnectFourAreaController from './interactable/ConnectFourAreaController';
 import ConversationAreaController from './interactable/ConversationAreaController';
@@ -40,6 +41,7 @@ import InteractableAreaController, {
   BaseInteractableEventMap,
   GenericInteractableAreaController,
 } from './interactable/InteractableAreaController';
+import PictionaryAreaController from './interactable/PictionaryAreaController';
 import TicTacToeAreaController from './interactable/TicTacToeAreaController';
 import ViewingAreaController from './interactable/ViewingAreaController';
 import PlayerController from './PlayerController';
@@ -630,6 +632,11 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
           } else if (isConnectFourArea(eachInteractable)) {
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
+            );
+          }
+            else if (isPictionaryArea(eachInteractable)) {
+              this._interactableControllers.push(
+                new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
             );
           }
         });
