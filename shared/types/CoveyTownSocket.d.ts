@@ -164,7 +164,7 @@ export type ConnectFourColor = 'Red' | 'Yellow';
 export type InteractableID = string;
 export type GameInstanceID = string;
 
-export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard';
+export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard' | 'No difficulty';
 
 export type PictionaryTeamLetter = 'A' | 'B';
 

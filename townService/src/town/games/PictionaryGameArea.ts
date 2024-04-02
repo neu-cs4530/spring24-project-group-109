@@ -11,6 +11,7 @@ import {
 } from '../../types/CoveyTownSocket';
 import PictionaryGame from './PictionaryGame';
 import GameArea from './GameArea';
+import WhiteBoardArea from '../WhiteBoardArea';
 
 /**
  * The PictionaryGameArea class is responsible for managing the state of a single game area for Pictionary.
@@ -48,6 +49,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
+    const whiteboardArea = new WhiteBoardArea();
     if (command.type === 'GameMove') {
       const game = this._game;
       if (!game) {
@@ -98,6 +100,14 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       }
       game.leave(player);
       this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (
+      command.type === 'DrawCommand' ||
+      command.type === 'EraseCommand' ||
+      command.type === 'ResetCommand'
+    ) {
+      whiteboardArea.handleCommand(command);
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);

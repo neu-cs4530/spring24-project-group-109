@@ -1,8 +1,8 @@
 import InvalidParametersError, { INVALID_DRAW_MESSAGE } from '../lib/InvalidParametersError';
 import { Color, Pixel } from '../types/CoveyTownSocket';
 
-const WHITEBOARD_HEIGHT = 10;
-const WHITEBOARD_WIDTH = 10;
+const WHITEBOARD_HEIGHT = 30;
+const WHITEBOARD_WIDTH = 30;
 
 /**
  * WhiteBoardModel is a class that represents a whiteboard.

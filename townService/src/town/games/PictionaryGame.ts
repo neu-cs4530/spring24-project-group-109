@@ -4,6 +4,7 @@ import InvalidParametersError, {
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  GAME_NOT_STARTABLE_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
@@ -30,7 +31,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       drawer: undefined,
       guesser: undefined,
       word: undefined,
-      difficulty: 'Easy',
+      difficulty: 'No difficulty',
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       teamAReady: false,
@@ -172,7 +173,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
-        status: 'IN_PROGRESS',
+        status: 'WAITING_TO_START',
       };
     }
   }
@@ -184,6 +185,9 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public startGame(difficulty: PictionaryWordDifficulty): void {
     // get a random word from the PictionaryDictionary array based on the difficulty
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
+    }
     if (difficulty === 'Easy') {
       this._wordList = EASY_WORDS;
     } else if (difficulty === 'Medium') {
@@ -192,6 +196,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       this._wordList = HARD_WORDS;
     }
     this._assignNewRoles();
+    this.state = {
+      ...this.state,
+      status: 'IN_PROGRESS',
+      difficulty,
+      word: this._chooseWord(),
+    };
   }
 
   /**

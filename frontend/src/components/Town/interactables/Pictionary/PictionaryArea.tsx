@@ -4,87 +4,74 @@ import PictionaryAreaController from '../../../../classes/interactable/Pictionar
 import useTownController from '../../../../hooks/useTownController';
 import { Color, GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import PlayerController from '../../../../classes/PlayerController';
-import {
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  List,
-  ListItem,
-  useToast,
-} from '@chakra-ui/react';
+import { Button, Container, Flex, Heading, Input, useToast } from '@chakra-ui/react';
 import pictionaryColorOptions from './PictionaryBoardContext';
 import PictionaryBoard from './PictionaryBoard';
-import PictionaryButtons from './PictionaryButtons';
 import PictionaryColor from './PictionaryColor';
-import { set } from 'lodash';
+import PictionaryButtons from './PictionaryButtons';
+import { List, ListItem } from '@chakra-ui/react';
 
-function PictionaryArea({ interactableID }: { interactableID: InteractableID }): JSX.Element {
+export default function PictionaryArea({
+  interactableID,
+}: {
+  interactableID: InteractableID;
+}): JSX.Element {
   const pictionaryAreaController =
     useInteractableAreaController<PictionaryAreaController>(interactableID);
   const townController = useTownController();
+
   const [drawer, setDrawer] = useState<PlayerController | undefined>(
     pictionaryAreaController.getDrawer(),
   );
   const [guesser, setGuesser] = useState<PlayerController | undefined>(
     pictionaryAreaController.getGuesser(),
   );
+  const [round, setRound] = useState<number>(pictionaryAreaController.getRound());
   const [teamA, setTeamA] = useState<PlayerController[]>(
     pictionaryAreaController.getTeamAPlayers(),
   );
   const [teamB, setTeamB] = useState<PlayerController[]>(
     pictionaryAreaController.getTeamBPlayers(),
   );
+
   const [word, setWord] = useState<string>(pictionaryAreaController.getWord());
   const [guess, setGuess] = useState<string>(pictionaryAreaController.getGuess());
-  const [color, setColor] = useState<Color>('#000000');
-  const [history, setHistory] = useState<GameResult[]>(pictionaryAreaController.history);
-  const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  //   const [observers, setObservers] = useState<PlayerController[]>(
-  //     pictionaryAreaController.observers,
-  //   );
-  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+
+  const [aScore, setAScore] = useState<number>(pictionaryAreaController.getTeamAScore());
+  const [bScore, setBScore] = useState<number>(pictionaryAreaController.getTeamBScore());
+
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
+  const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
+  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+  const [color, setColor] = useState<Color>('#000000');
+
   const toast = useToast();
 
+  //for updating round state
   useEffect(() => {
     const updateGameState = () => {
-      setHistory(pictionaryAreaController.history);
-      setGameStatus(pictionaryAreaController.status);
-      // setObservers(pictionaryAreaController.observers);
-      setDrawer(pictionaryAreaController.getDrawer());
-      setGuesser(pictionaryAreaController.getGuesser());
-      setWord(pictionaryAreaController.getWord());
-      setTimer(pictionaryAreaController.getTimer());
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
+      setWord(pictionaryAreaController.getWord());
+      setWord(pictionaryAreaController.getGuess());
+      setDrawer(pictionaryAreaController.getDrawer());
+      setGuesser(pictionaryAreaController.getGuesser());
+      setRound(pictionaryAreaController.getRound());
+      setGameStatus(pictionaryAreaController.status);
     };
-    pictionaryAreaController.addListener('gameUpdated', updateGameState);
     const onGameEnd = () => {
       const winner = pictionaryAreaController.winner;
       if (!winner) {
         toast({
           title: 'Game over',
-          description: 'Game ended in a tie',
+          description: 'Game ended without a winner',
           status: 'info',
-        });
-      } else if (winner === townController.ourPlayer) {
-        toast({
-          title: 'Game over',
-          description: 'You won!',
-          status: 'success',
-        });
-      } else {
-        toast({
-          title: 'Game over',
-          description: `You lost :(`,
-          status: 'error',
         });
       }
     };
+    pictionaryAreaController.addListener('gameUpdated', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
@@ -92,10 +79,39 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     };
   }, [townController, pictionaryAreaController, toast]);
 
+  let gameStatusText = <></>;
+
+  if (gameStatus === 'WAITING_FOR_PLAYERS') {
+    const joinGameButton = (
+      <Button
+        onClick={async () => {
+          setJoiningGame(true);
+          try {
+            await pictionaryAreaController.joinGame();
+          } catch (e) {
+            console.error(e);
+            toast({
+              title: 'Error joining test game',
+              description: (e as Error).toString(),
+              status: 'error',
+            });
+          }
+          setJoiningGame(false);
+        }}
+        isLoading={joiningGame}
+        disabled={joiningGame}>
+        Join New Game
+      </Button>
+    );
+    gameStatusText = <b>Game . {joinGameButton}</b>;
+    if (gameStatus === 'WAITING_TO_START') {
+      gameStatusText = <b>Game in {gameStatus}</b>;
+    }
+  }
   const gameStatusTextPlayers = (
     <>
-      Game in {'WAITING_FOR_PLAYERS'}, teamA:{pictionaryAreaController.getTeamAPlayers()}, teamB:
-      {pictionaryAreaController.getTeamBPlayers()}
+      Game in {'WAITING_FOR_PLAYERS'}, teamA:{teamA.map(id => id?.userName)}, teamB:
+      {teamB.map(id => id?.userName)}
       {pictionaryAreaController.getTeam()}
     </>
   );
@@ -107,43 +123,25 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
       {pictionaryAreaController.getTeamBScore()}
     </>
   );
-  const gameStatusTextWaiting = (
-    <>
-      <List aria-label='List of players in the game'>
-        <ListItem> Team A: {teamA.map(id => id?.userName) || '(No player yet)'}</ListItem>
-        <ListItem> Team B: {teamB.map(id => id?.userName) || '(No player yet)'}</ListItem>
-      </List>
-    </>
-  );
   return (
+    // <>
+    //   {gameStatusText}
+    //   <List aria-label='list of players in the game'>
+    //     <ListItem>Team A: {teamA.map(id => id?.userName) || '(No player yet!)'}</ListItem>
+    //     <ListItem>Team B: {teamB.map(id => id?.userName) || '(No player yet!)'}</ListItem>
+    //   </List>
+    // </>
     <Heading as='h1'>
       {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
-        <Flex flexDirection='row'>
-          <Container flexDirection='row'>
-            <Button
-              type='button'
-              onClick={async () => {
-                setJoiningGame(true);
-                try {
-                  await pictionaryAreaController.joinGame();
-                } catch (err) {
-                  toast({
-                    title: 'Error joining game',
-                    description: (err as Error).toString(),
-                    status: 'error',
-                  });
-                }
-                setJoiningGame(false);
-              }}
-              isLoading={joiningGame}
-              disabled={joiningGame}>
-              Join Game
-            </Button>
-          </Container>
-          {gameStatusTextWaiting}
-        </Flex>
+        <>
+          {gameStatusText}
+          <List aria-label='list of players in the game'>
+            <ListItem>Team A: {teamA.map(id => id?.userName) || '(No player yet!)'}</ListItem>
+            <ListItem>Team B: {teamB.map(id => id?.userName) || '(No player yet!)'}</ListItem>
+          </List>
+        </>
       ) : pictionaryAreaController.status === 'WAITING_TO_START' &&
-        !pictionaryAreaController.isPlayer ? (
+        pictionaryAreaController.getDifficulty() === 'No difficulty' ? (
         <Flex flexDirection='row'>
           {gameStatusTextPlayers}
           <Container flexDirection='column'>
@@ -253,4 +251,3 @@ function PictionaryArea({ interactableID }: { interactableID: InteractableID }):
     </Heading>
   );
 }
-export default PictionaryArea;
