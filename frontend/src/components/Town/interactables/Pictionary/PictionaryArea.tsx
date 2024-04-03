@@ -77,10 +77,12 @@ export default function PictionaryArea({
     };
     console.log('before game updating');
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
+    pictionaryAreaController.addListener('boardChanged', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       console.log('after game updating');
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
+      pictionaryAreaController.removeListener('boardChanged', updateGameState);
       pictionaryAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, pictionaryAreaController, toast]);
@@ -189,9 +191,14 @@ export default function PictionaryArea({
             {gameStatusTextScore}
             {timer}
             <Container flexDirection='column'>
-              <Heading as='h4'>{pictionaryAreaController.getDrawer() ? `${word}` : ''}</Heading>
+              <Heading as='h4'>
+                {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id
+                  ? `${word}`
+                  : ''}
+              </Heading>
               <PictionaryBoard
                 pictionaryAreaController={pictionaryAreaController}></PictionaryBoard>
+              {console.log(board)}
               <Flex flexDirection='row'>
                 <PictionaryColor></PictionaryColor>
                 <PictionaryButtons
@@ -220,7 +227,7 @@ export default function PictionaryArea({
                   try {
                     await pictionaryAreaController.makeMove(guess).then(() => {
                       setGuess('');
-                      if (guess == word) {
+                      if (guess === word) {
                         toast({
                           title: 'Correct Guess!',
                           description: 'You guessed the word!',

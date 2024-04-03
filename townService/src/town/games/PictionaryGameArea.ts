@@ -109,6 +109,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     ) {
       console.log(`before command`);
       whiteboardArea.handleCommand(command);
+      this._emitAreaChanged();
       console.log(`whiteboard command ${command.type}`);
       return undefined as InteractableCommandReturnType<CommandType>;
     }

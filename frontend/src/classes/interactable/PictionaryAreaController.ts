@@ -14,6 +14,9 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
+const WHITEBOARD_HEIGHT = 30;
+const WHITEBOARD_WIDTH = 30;
+
 /**
  * The type of the context that provides the Pictionary events
  */
@@ -29,6 +32,8 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
+  protected _board: Color[][] = this._model.game?.state.board.board;
+
   /**
    * Returns true if the game is not over
    */
@@ -175,7 +180,7 @@ export default class PictionaryAreaController extends GameAreaController<
    * Returns the current board state
    */
   get board(): Color[][] {
-    return this._model.game?.state.board.board;
+    return this._board;
   }
 
   /**
@@ -240,10 +245,25 @@ export default class PictionaryAreaController extends GameAreaController<
    */
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
     const oldModel = this._model;
-    super._updateFrom(newModel);
+    super._updateFrom(newModel); // calling gameUpdated in the GameAreaController
+    const newState = newModel.game;
+    // if (newState) {
+    //   const board: Color[][] = [];
+    //   for (let i = 0; i < WHITEBOARD_HEIGHT; i += 1) {
+    //     const row: Color[] = [];
+    //     for (let j = 0; j < WHITEBOARD_WIDTH; j += 1) {
+    //       row.push(`#${'FFFFFF'}`);
+    //     }
+    //     board.push(row);
+    //   }
+    //   newState.state.board.board.forEach(pixel: Pixel=> {
+    //     board[pixel.x][pixel.y] = pixel.color;
+    //   });
+    // }
     if (newModel) {
       // if board has changed (ex. new drawing)
       if (oldModel.game?.state.board.board !== newModel.game?.state.board.board) {
+        this._board = newModel.game?.state.board.board;
         this.emit('boardChanged', this.board);
       }
       // drawer has changed
@@ -288,9 +308,9 @@ export default class PictionaryAreaController extends GameAreaController<
    *
    * If the game is not in progress, throws an error NO_GAME_IN_PROGRESS_ERROR
    *
-   * @param word The guess to make in the game
+   * @param guess The guess to make in the game
    */
-  public async makeMove(word: string): Promise<void> {
+  public async makeMove(guess: string): Promise<void> {
     const instanceID = this._instanceID;
     if (!instanceID || this._model.game?.state.status !== 'IN_PROGRESS') {
       throw new Error(NO_GAME_IN_PROGRESS_ERROR);
@@ -305,7 +325,7 @@ export default class PictionaryAreaController extends GameAreaController<
       type: 'GameMove',
       gameID: instanceID,
       move: {
-        guess: word,
+        guess: guess,
       },
     });
   }

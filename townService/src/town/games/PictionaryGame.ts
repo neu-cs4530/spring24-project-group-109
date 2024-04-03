@@ -93,7 +93,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public applyMove(move: GameMove<PictionaryMove>): void {
     const guess: PictionaryMove = move.move;
-    this.state.guess = move.move.guess;
+    this.state.guess = guess.guess;
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
@@ -107,7 +107,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
     // correct guess case
-    if (guess.guess.toLowerCase() === this.state.word?.toLowerCase()) {
+    if (this.state.guess.toLowerCase() === this.state.word?.toLowerCase()) {
       const team = this.state.drawer ? this.state.teamA : this.state.teamB;
       if (team === this.state.teamA) {
         this.state = {
