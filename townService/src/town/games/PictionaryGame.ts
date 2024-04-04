@@ -48,6 +48,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       // board: new WhiteBoardArea(),
       board: undefined,
       guess: undefined,
+      // currentColor: '#000000',
     });
     this._wordList = EASY_WORDS;
     this.state.board = this._getBoard();
@@ -73,6 +74,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     drawing.forEach((pixel: Pixel) => {
       if (this.state.board) {
         this.state.board[pixel.x][pixel.y] = pixel.color;
+        // this.state.currentColor = pixel.color;
         console.log(`Drawing at ${pixel.x}, ${pixel.y}, color: ${pixel.color}`);
         console.log(this.state.board[pixel.x][pixel.y]);
       }
@@ -99,6 +101,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     drawing.forEach((pixel: Pixel) => {
       if (this.state.board) {
         this.state.board[pixel.x][pixel.y] = `#${'FFFFFF'}`;
+        // this.state.currentColor = `#${'FFFFFF'}`;
       }
     });
   }
@@ -153,6 +156,9 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       } else if (this.state.timer === 0) {
         this.state = { ...this.state, timer: ROUND_TIME, round: this.state.round + 1 };
         this._assignNewRoles();
+        this.state.word = this._chooseWord();
+        this.reset();
+        // this.state.currentColor = '#000000';
       }
     }
   }
@@ -184,23 +190,27 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
     // correct guess case
     if (this.state.guess.toLowerCase() === this.state.word?.toLowerCase()) {
-      const team = this.state.drawer ? this.state.teamA : this.state.teamB;
-      if (team === this.state.teamA) {
-        this.state = {
-          ...this.state,
-          status: 'IN_PROGRESS',
-          teamA: { ...team, score: team.score + 1 },
-          usedWords: [...this.state.usedWords, this.state.word],
-          word: this._chooseWord(),
-        };
-      } else {
-        this.state = {
-          ...this.state,
-          status: 'IN_PROGRESS',
-          teamB: { ...team, score: team.score + 1 },
-          usedWords: [...this.state.usedWords, this.state.word],
-          word: this._chooseWord(),
-        };
+      if (this.state.drawer) {
+        const team = this.state.teamA.players.includes(this.state.drawer)
+          ? this.state.teamA
+          : this.state.teamB;
+        if (team === this.state.teamA) {
+          this.state = {
+            ...this.state,
+            status: 'IN_PROGRESS',
+            teamA: { ...team, score: team.score + 1 },
+            usedWords: [...this.state.usedWords, this.state.word],
+            word: this._chooseWord(),
+          };
+        } else {
+          this.state = {
+            ...this.state,
+            status: 'IN_PROGRESS',
+            teamB: { ...team, score: team.score + 1 },
+            usedWords: [...this.state.usedWords, this.state.word],
+            word: this._chooseWord(),
+          };
+        }
       }
     }
   }

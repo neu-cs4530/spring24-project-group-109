@@ -10,11 +10,11 @@ export default function PictionaryColor(): JSX.Element {
   const { color, setColor } = useContext(pictionaryColorOptions) as PictionaryColorOptionsType;
 
   const handleColorChange = (newColor: ColorResult) => {
-    setColor(`#${newColor.hex}`);
+    setColor(`${newColor.hex}`);
   };
   return (
     <Box mt='10px' mb='10px'>
-      <CirclePicker color={color} onChangeComplete={handleColorChange} />
+      <CirclePicker color={color.substring(2)} onChangeComplete={handleColorChange} />
     </Box>
   );
 }

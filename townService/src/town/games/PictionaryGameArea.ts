@@ -59,6 +59,8 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
     // const whiteboardArea = new WhiteBoardArea();
+    this.game?.tickDown();
+    this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
       if (!game) {
@@ -140,17 +142,5 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
-    // if (
-    //   command.type === 'DrawCommand' ||
-    //   command.type === 'EraseCommand' ||
-    //   command.type === 'ResetCommand'
-    // ) {
-    //   console.log(`before command`);
-    //   whiteboardArea.handleCommand(command);
-    //   this._emitAreaChanged();
-    //   console.log(`whiteboard command ${command.type}`);
-    //   return undefined as InteractableCommandReturnType<CommandType>;
-    // }
-    // throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }

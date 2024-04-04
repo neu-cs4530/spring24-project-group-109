@@ -14,8 +14,8 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
-const WHITEBOARD_HEIGHT = 30;
-const WHITEBOARD_WIDTH = 30;
+// const WHITEBOARD_HEIGHT = 30;
+// const WHITEBOARD_WIDTH = 30;
 
 /**
  * The type of the context that provides the Pictionary events
@@ -183,6 +183,10 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._board;
   }
 
+  // public getColor(): Color {
+  //   return this._model.game?.state.currentColor ?? '#000000';
+  // }
+
   /**
    * Starts the game based on the difficulty that the player chooses
    * @param difficulty the game difficulty level
@@ -214,10 +218,10 @@ export default class PictionaryAreaController extends GameAreaController<
    */
   get status(): GameStatus {
     const status = this._model.game?.state.status;
-    if (!status) {
+    if (!this._model.game) {
       return 'WAITING_FOR_PLAYERS';
     }
-    return status;
+    return this._model.game?.state.status ?? 'WAITING_TO_START';
   }
 
   /**
@@ -246,20 +250,6 @@ export default class PictionaryAreaController extends GameAreaController<
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
     const oldModel = this._model;
     super._updateFrom(newModel); // calling gameUpdated in the GameAreaController
-    // const newState = newModel.game;
-    // if (newState) {
-    //   const board: Color[][] = [];
-    //   for (let i = 0; i < WHITEBOARD_HEIGHT; i += 1) {
-    //     const row: Color[] = [];
-    //     for (let j = 0; j < WHITEBOARD_WIDTH; j += 1) {
-    //       row.push(`#${'FFFFFF'}`);
-    //     }
-    //     board.push(row);
-    //   }
-    //   newState.state.board.board.forEach(pixel: Pixel=> {
-    //     board[pixel.x][pixel.y] = pixel.color;
-    //   });
-    // }
     if (newModel) {
       // if board has changed (ex. new drawing)
       if (oldModel.game?.state.board !== newModel.game?.state.board) {

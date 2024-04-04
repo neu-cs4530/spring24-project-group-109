@@ -193,6 +193,7 @@ export interface PictionaryGameState extends WinnableGameState {
   // board: WhiteBoardArea;
   guess?: string;
   board:  Color[][] | undefined;
+  // currentColor: Color;
 }
 
 /**

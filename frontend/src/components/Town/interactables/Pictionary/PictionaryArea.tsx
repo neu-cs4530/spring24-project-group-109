@@ -50,6 +50,8 @@ export default function PictionaryArea({
 
   const toast = useToast();
 
+  // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
+
   //for updating round state
   useEffect(() => {
     console.log('enter use effect');
@@ -57,13 +59,14 @@ export default function PictionaryArea({
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
       setWord(pictionaryAreaController.getWord());
-      setWord(pictionaryAreaController.getGuess());
+      setGuess(pictionaryAreaController.getGuess());
       setDrawer(pictionaryAreaController.getDrawer());
       setGuesser(pictionaryAreaController.getGuesser());
       setRound(pictionaryAreaController.getRound());
       setGameStatus(pictionaryAreaController.status);
       setBoard(pictionaryAreaController.board);
       setTimer(pictionaryAreaController.getTimer());
+      // setColor(pictionaryAreaController.getColor());
     };
     const onGameEnd = () => {
       const winner = pictionaryAreaController.winner;
@@ -77,12 +80,10 @@ export default function PictionaryArea({
     };
     console.log('before game updating');
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
-    pictionaryAreaController.addListener('boardChanged', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
       console.log('after game updating');
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
-      pictionaryAreaController.removeListener('boardChanged', updateGameState);
       pictionaryAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, pictionaryAreaController, toast]);
@@ -112,27 +113,38 @@ export default function PictionaryArea({
       </Button>
     );
     gameStatusText = <b>Game . {joinGameButton}</b>;
-    if (gameStatus === 'WAITING_TO_START') {
-      gameStatusText = <b>Game in {gameStatus}</b>;
-    }
+    // if (gameStatus === 'WAITING_TO_START') {
+    //   gameStatusText = <b>Game in {gameStatus}</b>;
+    // }
   }
   const gameStatusTextPlayers = (
     <>
-      Game in {'WAITING_FOR_PLAYERS'}, teamA:{teamA.map(id => id?.userName)}, teamB:
-      {teamB.map(id => id?.userName)}
-      {pictionaryAreaController.getTeam()}
+      Game is{' '}
+      {gameStatus === 'WAITING_TO_START' ? (
+        <>
+          waiting for difficulty selection. teamA:{teamA.map(id => id?.userName)}, teamB:
+          {teamB.map(id => id?.userName)}
+          {pictionaryAreaController.getTeam()}
+        </>
+      ) : (
+        <>
+          over! Team A score: {pictionaryAreaController.getTeamAScore()}, Team B score:{' '}
+          {pictionaryAreaController.getTeamBScore()}{' '}
+        </>
+      )}
     </>
   );
   const gameStatusTextScore = (
     <>
-      Game in progress, round: {pictionaryAreaController.getRound()}, currently:{' '}
+      Game in progress, round: {pictionaryAreaController.getRound() + 1}, currently:{' '}
       {pictionaryAreaController.getTeam()} turn, Team A score:{' '}
       {pictionaryAreaController.getTeamAScore()}, Team B score:{' '}
       {pictionaryAreaController.getTeamBScore()}
     </>
   );
+
   return (
-    <Heading as='h5'>
+    <Heading size='s'>
       {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
         <>
           {gameStatusText}
@@ -141,57 +153,73 @@ export default function PictionaryArea({
             <ListItem>Team B: {teamB.map(id => id?.userName) || '(No player yet!)'}</ListItem>
           </List>
         </>
-      ) : pictionaryAreaController.status === 'WAITING_TO_START' &&
-        pictionaryAreaController.getDifficulty() === 'No difficulty' ? (
+      ) : (pictionaryAreaController.status === 'WAITING_TO_START' &&
+          pictionaryAreaController.getDifficulty() === 'No difficulty') ||
+        pictionaryAreaController.status === 'OVER' ? (
         <Flex flexDirection='row'>
           {gameStatusTextPlayers}
-          <Container flexDirection='column'>
-            <Button
-              type='button'
-              onClick={async () => {
-                setStartingGame(true);
-                await pictionaryAreaController.startGame('Easy');
-                setStartingGame(false);
-              }}
-              isLoading={startingGame}
-              disabled={startingGame}>
-              Start Easy Game
-            </Button>
-          </Container>
-          <Container flexDirection='column'>
-            <Button
-              type='button'
-              onClick={async () => {
-                setStartingGame(true);
-                await pictionaryAreaController.startGame('Medium');
-                setStartingGame(false);
-              }}
-              isLoading={startingGame}
-              disabled={startingGame}>
-              Start Medium Game
-            </Button>
-          </Container>
-          <Container flexDirection='column'>
-            <Button
-              type='button'
-              onClick={async () => {
-                setStartingGame(true);
-                await pictionaryAreaController.startGame('Hard');
-                setStartingGame(false);
-              }}
-              isLoading={startingGame}
-              disabled={startingGame}>
-              Start Hard Game
-            </Button>
-          </Container>
+          <Flex flexDirection='row'>
+            <Container flexDirection='column'>
+              <Button
+                type='button'
+                onClick={async () => {
+                  setStartingGame(true);
+                  await pictionaryAreaController.startGame('Easy');
+                  setStartingGame(false);
+                }}
+                isLoading={startingGame}
+                disabled={startingGame}>
+                Easy Game
+              </Button>
+            </Container>
+            <Container flexDirection='column'>
+              <Button
+                type='button'
+                onClick={async () => {
+                  setStartingGame(true);
+                  await pictionaryAreaController.startGame('Medium');
+                  setStartingGame(false);
+                }}
+                isLoading={startingGame}
+                disabled={startingGame}>
+                Medium Game
+              </Button>
+              <Button
+                type='button'
+                onClick={async () => {
+                  setLeavingGame(true);
+                  await pictionaryAreaController.leaveGame();
+                  setLeavingGame(false);
+                }}
+                isLoading={leavingGame}
+                disabled={leavingGame}>
+                Leave Game
+              </Button>
+            </Container>
+            <Container flexDirection='column'>
+              <Button
+                type='button'
+                onClick={async () => {
+                  setStartingGame(true);
+                  await pictionaryAreaController.startGame('Hard');
+                  setStartingGame(false);
+                }}
+                isLoading={startingGame}
+                disabled={startingGame}>
+                Hard Game
+              </Button>
+            </Container>
+          </Flex>
         </Flex>
       ) : (
-        <pictionaryColorOptions.Provider value={{ color, setColor }}>
+        <pictionaryColorOptions.Provider value={{ color: color, setColor: setColor }}>
+          {color}
           <Flex flexDirection='row'>
-            {gameStatusTextScore}
+            <Heading size='s'>{gameStatusTextScore}</Heading>
             {timer}
+            {<> Make a guess with no spaces </>}
             <Container flexDirection='column'>
-              <Heading as='h4'>
+              <Heading size='lg'>
                 {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id
                   ? `${word}`
                   : ''}
@@ -203,6 +231,13 @@ export default function PictionaryArea({
                 <PictionaryColor></PictionaryColor>
                 <PictionaryButtons
                   pictionaryAreaController={pictionaryAreaController}></PictionaryButtons>
+                <Button
+                  type='button'
+                  onClick={async () => {
+                    setColor('#FFFFFF');
+                  }}>
+                  Erase Button
+                </Button>
               </Flex>
             </Container>
             <Container flexDirection='column'>

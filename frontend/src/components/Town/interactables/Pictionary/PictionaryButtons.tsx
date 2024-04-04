@@ -1,4 +1,4 @@
-import React from '@chakra-ui/react';
+import React, { Button } from '@chakra-ui/react';
 import { PictionaryGameProps } from './PictionaryBoard';
 import useTownController from '../../../../hooks/useTownController';
 import { useContext } from 'react';
@@ -10,24 +10,26 @@ import pictionaryColorOptions, { PictionaryColorOptionsType } from './Pictionary
 function PictionaryButtons({ pictionaryAreaController }: PictionaryGameProps): JSX.Element {
   const { color } = useContext(pictionaryColorOptions) as PictionaryColorOptionsType;
   const townController = useTownController();
-  const eraseButton = (
-    <button>
-      {color} = {`#${'FFFFFF'}`}
-      Erase Button
-    </button>
-  );
+  // const eraseButton = (
+  //   <Button
+  //     onClick={async () => {
+  //       ({ color } = '#FFFFFF');
+  //     }}>
+  //     Erase Button
+  //   </Button>
+  // );
   const resetButton = (
-    <button
+    <Button
       onClick={async () => {
         await pictionaryAreaController.reset();
       }}>
       ResetButton
-    </button>
+    </Button>
   );
   return (
     <>
       {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id &&
-        eraseButton &&
+        // eraseButton &&
         resetButton}
     </>
   );
