@@ -117,6 +117,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
       }
       this.game?.draw(drawCommand.drawing);
+      this._emitAreaChanged();
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'EraseCommand') {
@@ -126,6 +127,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
       }
       this.game?.erase(drawCommand.drawing);
+      this._emitAreaChanged();
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'ResetCommand') {
@@ -134,6 +136,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
       }
       this.game?.reset();
+      this._emitAreaChanged();
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
