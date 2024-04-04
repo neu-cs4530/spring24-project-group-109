@@ -1,17 +1,22 @@
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  INVALID_BOARD_MESSAGE,
   INVALID_COMMAND_MESSAGE,
+  INVALID_DRAWER_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
+  Color,
+  DrawCommand,
+  EraseCommand,
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
 } from '../../types/CoveyTownSocket';
 import PictionaryGame from './PictionaryGame';
 import GameArea from './GameArea';
-import WhiteBoardArea from '../WhiteBoardArea';
+// import WhiteBoardArea from '../WhiteBoardArea';
 
 /**
  * The PictionaryGameArea class is responsible for managing the state of a single game area for Pictionary.
@@ -24,6 +29,10 @@ import WhiteBoardArea from '../WhiteBoardArea';
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   protected getType(): InteractableType {
     return 'PictionaryArea';
+  }
+
+  get board(): Color[][] {
+    return this._game?.state.board ?? [];
   }
 
   /**
@@ -49,7 +58,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    const whiteboardArea = new WhiteBoardArea();
+    // const whiteboardArea = new WhiteBoardArea();
     if (command.type === 'GameMove') {
       const game = this._game;
       if (!game) {
@@ -102,17 +111,43 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       this._emitAreaChanged();
       return undefined as InteractableCommandReturnType<CommandType>;
     }
-    if (
-      command.type === 'DrawCommand' ||
-      command.type === 'EraseCommand' ||
-      command.type === 'ResetCommand'
-    ) {
-      console.log(`before command`);
-      whiteboardArea.handleCommand(command);
-      this._emitAreaChanged();
-      console.log(`whiteboard command ${command.type}`);
+    if (command.type === 'DrawCommand') {
+      const drawCommand = command as DrawCommand;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.draw(drawCommand.drawing);
       return undefined as InteractableCommandReturnType<CommandType>;
     }
-    throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
+    if (command.type === 'EraseCommand') {
+      const drawCommand = command as EraseCommand;
+      // const { board } = this.board;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.erase(drawCommand.drawing);
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'ResetCommand') {
+      // const { board } = this._game.board;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.reset();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
+    // if (
+    //   command.type === 'DrawCommand' ||
+    //   command.type === 'EraseCommand' ||
+    //   command.type === 'ResetCommand'
+    // ) {
+    //   console.log(`before command`);
+    //   whiteboardArea.handleCommand(command);
+    //   this._emitAreaChanged();
+    //   console.log(`whiteboard command ${command.type}`);
+    //   return undefined as InteractableCommandReturnType<CommandType>;
+    // }
+    // throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }

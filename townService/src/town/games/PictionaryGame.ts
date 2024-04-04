@@ -5,19 +5,24 @@ import InvalidParametersError, {
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
   GAME_NOT_STARTABLE_MESSAGE,
+  INVALID_DRAW_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
+  Color,
   GameMove,
   PictionaryGameState,
   PictionaryMove,
   PictionaryWordDifficulty,
+  Pixel,
 } from '../../types/CoveyTownSocket';
-import WhiteBoardArea from '../WhiteBoardArea';
+// import WhiteBoardArea from '../WhiteBoardArea';
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
 const ROUND_TIME = 60; // seconds
+const WHITEBOARD_HEIGHT = 30;
+const WHITEBOARD_WIDTH = 30;
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
@@ -40,10 +45,81 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       timer: ROUND_TIME, // seconds
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
-      board: new WhiteBoardArea(),
+      // board: new WhiteBoardArea(),
+      board: undefined,
       guess: undefined,
     });
     this._wordList = EASY_WORDS;
+    this.state.board = this._getBoard();
+  }
+
+  /**
+   * Draws a given drawing on the whiteboard. The drawing is a list of pixels.
+   * @param drawing The drawing to be drawn on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void and updates the whiteboard.
+   */
+  public draw(drawing: Pixel[]): void {
+    drawing.forEach((pixel: Pixel) => {
+      if (
+        pixel.x < 0 ||
+        pixel.x >= WHITEBOARD_HEIGHT ||
+        pixel.y < 0 ||
+        pixel.y >= WHITEBOARD_WIDTH
+      ) {
+        throw new InvalidParametersError(INVALID_DRAW_MESSAGE);
+      }
+    });
+    drawing.forEach((pixel: Pixel) => {
+      if (this.state.board) {
+        this.state.board[pixel.x][pixel.y] = pixel.color;
+        console.log(`Drawing at ${pixel.x}, ${pixel.y}, color: ${pixel.color}`);
+        console.log(this.state.board[pixel.x][pixel.y]);
+      }
+    });
+  }
+
+  /**
+   * Erase a given drawing on the whiteboard. The drawing is a list of pixels.
+   * @param drawing The drawing to be erased on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void and updates the whiteboard.
+   */
+  public erase(drawing: Pixel[]): void {
+    drawing.forEach((pixel: Pixel) => {
+      if (
+        pixel.x < 0 ||
+        pixel.x >= WHITEBOARD_HEIGHT ||
+        pixel.y < 0 ||
+        pixel.y >= WHITEBOARD_WIDTH
+      ) {
+        throw new InvalidParametersError(INVALID_DRAW_MESSAGE);
+      }
+    });
+    drawing.forEach((pixel: Pixel) => {
+      if (this.state.board) {
+        this.state.board[pixel.x][pixel.y] = `#${'FFFFFF'}`;
+      }
+    });
+  }
+
+  /**
+   * Reset the whiteboard to its initial blank state.
+   */
+  public reset(): void {
+    this.state.board = this._getBoard();
+  }
+
+  private _getBoard(): Color[][] {
+    const board: Color[][] = [];
+    for (let i = 0; i < WHITEBOARD_HEIGHT; i += 1) {
+      const row: Color[] = [];
+      for (let j = 0; j < WHITEBOARD_WIDTH; j += 1) {
+        row.push(`#${'FFFFFF'}`);
+      }
+      board.push(row);
+    }
+    return board;
   }
 
   private _assignNewRoles(): void {
@@ -157,12 +233,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (teamAPlayers.includes(player.id) || teamBPlayers.includes(player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (teamAPlayers.length < 2) {
+    if (teamAPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamA: { ...teamA, players: [...teamAPlayers, player.id] },
       };
-    } else if (teamBPlayers.length < 2) {
+    } else if (teamBPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamB: { ...teamB, players: [...teamBPlayers, player.id] },
@@ -170,7 +246,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
+    if (this.state.teamA.players.length === 1 && this.state.teamB.players.length === 1) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',

@@ -32,7 +32,7 @@ export default class PictionaryAreaController extends GameAreaController<
   PictionaryGameState,
   PictionaryEvents
 > {
-  protected _board: Color[][] = this._model.game?.state.board.board;
+  protected _board: Color[][] = this._model.game?.state.board ?? [];
 
   /**
    * Returns true if the game is not over
@@ -246,7 +246,7 @@ export default class PictionaryAreaController extends GameAreaController<
   protected _updateFrom(newModel: GameArea<PictionaryGameState>): void {
     const oldModel = this._model;
     super._updateFrom(newModel); // calling gameUpdated in the GameAreaController
-    const newState = newModel.game;
+    // const newState = newModel.game;
     // if (newState) {
     //   const board: Color[][] = [];
     //   for (let i = 0; i < WHITEBOARD_HEIGHT; i += 1) {
@@ -262,9 +262,19 @@ export default class PictionaryAreaController extends GameAreaController<
     // }
     if (newModel) {
       // if board has changed (ex. new drawing)
-      if (oldModel.game?.state.board.board !== newModel.game?.state.board.board) {
-        this._board = newModel.game?.state.board.board;
+      if (oldModel.game?.state.board !== newModel.game?.state.board) {
+        console.log('board changed');
+        if (this._board) {
+          this._board = newModel.game?.state.board ?? [];
+        }
         this.emit('boardChanged', this.board);
+        for (const pixel of this._board) {
+          for (const eachPixel of pixel) {
+            if (eachPixel !== '#FFFFFF') {
+              console.log(`Drawing at color: ${eachPixel}`);
+            }
+          }
+        }
       }
       // drawer has changed
       // is basically also checking isOurTurn
