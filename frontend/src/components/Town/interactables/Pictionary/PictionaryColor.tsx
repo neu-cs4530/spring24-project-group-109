@@ -9,6 +9,7 @@ import { CirclePicker, ColorResult } from 'react-color';
 export default function PictionaryColor(): JSX.Element {
   const { color, setColor } = useContext(pictionaryColorOptions) as PictionaryColorOptionsType;
 
+  // TODO - can change to type any and explain linter error (turns yellow)
   const handleColorChange = (newColor: ColorResult) => {
     setColor(`${newColor.hex}`);
   };
