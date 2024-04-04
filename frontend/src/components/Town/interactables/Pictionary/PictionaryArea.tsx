@@ -231,6 +231,17 @@ export default function PictionaryArea({
                 <PictionaryColor></PictionaryColor>
                 <PictionaryButtons
                   pictionaryAreaController={pictionaryAreaController}></PictionaryButtons>
+                {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id ? (
+                  <Button
+                    type='button'
+                    onClick={async () => {
+                      setColor('#FFFFFF');
+                    }}>
+                    Erase Button
+                  </Button>
+                ) : (
+                  ''
+                )}
                 <Button
                   type='button'
                   onClick={async () => {
@@ -252,39 +263,45 @@ export default function PictionaryArea({
                 disabled={leavingGame}>
                 Leave Game
               </Button>
-              <Input
-                placeholder='Guess'
-                value={guess}
-                onChange={event => setGuess(event.target.value)}
-              />
-              <Button
-                onClick={async () => {
-                  try {
-                    await pictionaryAreaController.makeMove(guess).then(() => {
-                      setGuess('');
-                      if (guess === word) {
-                        toast({
-                          title: 'Correct Guess!',
-                          description: 'You guessed the word!',
-                          status: 'success',
+              {pictionaryAreaController.getGuesser()?.id === townController.ourPlayer.id ? (
+                <Flex>
+                  <Input
+                    placeholder='Guess'
+                    value={guess}
+                    onChange={event => setGuess(event.target.value)}
+                  />
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await pictionaryAreaController.makeMove(guess).then(() => {
+                          setGuess('');
+                          if (guess === word) {
+                            toast({
+                              title: 'Correct Guess!',
+                              description: 'You guessed the word!',
+                              status: 'success',
+                            });
+                          } else {
+                            toast({
+                              title: 'Incorrect Guess',
+                              description: 'Try again',
+                            });
+                          }
                         });
-                      } else {
+                      } catch (err) {
                         toast({
-                          title: 'Incorrect Guess',
-                          description: 'Try again',
+                          title: 'Error making move',
+                          description: (err as Error).toString(),
+                          status: 'error',
                         });
                       }
-                    });
-                  } catch (err) {
-                    toast({
-                      title: 'Error making move',
-                      description: (err as Error).toString(),
-                      status: 'error',
-                    });
-                  }
-                }}>
-                Guess
-              </Button>
+                    }}>
+                    Guess
+                  </Button>
+                </Flex>
+              ) : (
+                ''
+              )}
             </Container>
           </Flex>
         </pictionaryColorOptions.Provider>
