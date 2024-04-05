@@ -21,8 +21,8 @@ import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
 const ROUND_TIME = 60; // seconds
-const WHITEBOARD_HEIGHT = 30;
-const WHITEBOARD_WIDTH = 30;
+const WHITEBOARD_HEIGHT = 35;
+const WHITEBOARD_WIDTH = 50;
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
@@ -149,6 +149,13 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public tickDown(): void {
     if (this.state.round === 4) {
+      if (this.state.teamA.score > this.state.teamB.score) {
+        this.state.winner = 'A';
+      } else if (this.state.teamA.score < this.state.teamB.score) {
+        this.state.winner = 'B';
+      } else {
+        this.state.winner = ' ';
+      }
       this.state = { ...this.state, status: 'OVER' };
     } else if (this.state.status === 'IN_PROGRESS') {
       if (this.state.timer > 0) {
@@ -158,6 +165,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         this._assignNewRoles();
         this.state.word = this._chooseWord();
         this.reset();
+        this.state.guess = undefined;
         // this.state.currentColor = '#000000';
       }
     }
@@ -243,12 +251,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (teamAPlayers.includes(player.id) || teamBPlayers.includes(player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (teamAPlayers.length < 1) {
+    if (teamAPlayers.length < 2) {
       this.state = {
         ...this.state,
         teamA: { ...teamA, players: [...teamAPlayers, player.id] },
       };
-    } else if (teamBPlayers.length < 1) {
+    } else if (teamBPlayers.length < 2) {
       this.state = {
         ...this.state,
         teamB: { ...teamB, players: [...teamBPlayers, player.id] },
@@ -256,7 +264,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-    if (this.state.teamA.players.length === 1 && this.state.teamB.players.length === 1) {
+    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',

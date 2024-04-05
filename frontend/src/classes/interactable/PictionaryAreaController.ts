@@ -56,7 +56,10 @@ export default class PictionaryAreaController extends GameAreaController<
    * Returns the team letter of the player who is drawing
    */
   public getTeam() {
-    if (this.getDrawer()?.id === this._model.game?.state.teamA.players[0]) {
+    if (
+      this.getDrawer()?.id === this._model.game?.state.teamA.players[0] ||
+      this.getDrawer()?.id === this._model.game?.state.teamA.players[1]
+    ) {
       return 'A';
     } else {
       return 'B';
@@ -91,12 +94,8 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Returns the player who has won the game
    */
-  get winner(): PlayerController | undefined {
-    const winner = this._model.game?.state.winner;
-    if (winner) {
-      return this.occupants.find(eachOccupant => eachOccupant.id === winner);
-    }
-    return undefined;
+  get winner(): string | undefined {
+    return this._model.game?.state.winner ?? ' ';
   }
 
   /**

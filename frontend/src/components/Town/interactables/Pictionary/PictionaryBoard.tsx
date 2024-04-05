@@ -4,8 +4,8 @@ import useTownController from '../../../../hooks/useTownController';
 import { Color } from '../../../../types/CoveyTownSocket';
 import pictionaryColorOptions, { PictionaryColorOptionsType } from './PictionaryBoardContext';
 
-const WHITEBOARD_HEIGHT = 30;
-const WHITEBOARD_WIDTH = 30;
+const WHITEBOARD_HEIGHT = 35;
+const WHITEBOARD_WIDTH = 50;
 
 /**
  * The props for the Pictionary game component
