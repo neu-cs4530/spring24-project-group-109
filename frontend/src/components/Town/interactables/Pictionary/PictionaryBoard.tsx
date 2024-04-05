@@ -4,11 +4,12 @@ import useTownController from '../../../../hooks/useTownController';
 import { Color } from '../../../../types/CoveyTownSocket';
 import pictionaryColorOptions, { PictionaryColorOptionsType } from './PictionaryBoardContext';
 
-// TODO: MAKE A CONSTANTS FILE FOR THESE
-const WHITEBOARD_HEIGHT = 10;
-const WHITEBOARD_WIDTH = 10;
+const WHITEBOARD_HEIGHT = 35;
+const WHITEBOARD_WIDTH = 50;
 
-// TODO: JAVADOC
+/**
+ * The props for the Pictionary game component
+ */
 export type PictionaryGameProps = {
   pictionaryAreaController: PictionaryAreaController;
 };
@@ -40,8 +41,11 @@ export default function PictionaryBoard({
     setBoard(newBoard);
   };
   useEffect(() => {
+    console.log('board change 1');
     pictionaryAreaController.addListener('boardChanged', handleBoardChanges);
+    console.log('handle');
     return () => {
+      console.log('board change 2');
       pictionaryAreaController.removeListener('boardChanged', handleBoardChanges);
     };
   }, [pictionaryAreaController]);

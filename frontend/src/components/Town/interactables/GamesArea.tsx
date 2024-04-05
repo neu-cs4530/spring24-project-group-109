@@ -107,20 +107,22 @@ function GameArea({ interactableID }: { interactableID: InteractableID }): JSX.E
             <>{INVALID_GAME_AREA_TYPE_MESSAGE}</>
           )}
         </Box>
-        <Box
-          style={{
-            height: '400px',
-            overflowY: 'scroll',
-          }}>
-          <div
+        {gameAreaController.toInteractableAreaModel().type != 'PictionaryArea' && (
+          <Box
             style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
+              height: '400px',
+              overflowY: 'scroll',
             }}>
-            <ChatChannel interactableID={gameAreaController.id} />
-          </div>
-        </Box>
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}>
+              <ChatChannel interactableID={gameAreaController.id} />
+            </div>
+          </Box>
+        )}
       </Flex>
     </>
   );

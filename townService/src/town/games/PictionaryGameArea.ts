@@ -1,18 +1,22 @@
 import InvalidParametersError, {
   GAME_ID_MISSMATCH_MESSAGE,
   GAME_NOT_IN_PROGRESS_MESSAGE,
+  INVALID_BOARD_MESSAGE,
   INVALID_COMMAND_MESSAGE,
+  INVALID_DRAWER_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
-  PictionaryGameState,
-  GameInstance,
+  Color,
+  DrawCommand,
+  EraseCommand,
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
 } from '../../types/CoveyTownSocket';
 import PictionaryGame from './PictionaryGame';
 import GameArea from './GameArea';
+// import WhiteBoardArea from '../WhiteBoardArea';
 
 /**
  * The PictionaryGameArea class is responsible for managing the state of a single game area for Pictionary.
@@ -25,6 +29,10 @@ import GameArea from './GameArea';
 export default class PictionaryGameArea extends GameArea<PictionaryGame> {
   protected getType(): InteractableType {
     return 'PictionaryArea';
+  }
+
+  get board(): Color[][] {
+    return this._game?.state.board ?? [];
   }
 
   /**
@@ -50,6 +58,9 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
+    // const whiteboardArea = new WhiteBoardArea();
+    this.game?.tickDown();
+    this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
       if (!game) {
@@ -70,6 +81,15 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         this._emitAreaChanged();
         return undefined as InteractableCommandReturnType<CommandType>;
       }
+    }
+    if (command.type === 'PictionaryStartGame') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      game.startGame(command.difficulty);
+      this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'JoinGame') {
       let game = this._game;
@@ -93,6 +113,34 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       this._emitAreaChanged();
       return undefined as InteractableCommandReturnType<CommandType>;
     }
-    throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
+    if (command.type === 'DrawCommand') {
+      const drawCommand = command as DrawCommand;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.draw(drawCommand.drawing);
+      this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'EraseCommand') {
+      const drawCommand = command as EraseCommand;
+      // const { board } = this.board;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.erase(drawCommand.drawing);
+      this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    if (command.type === 'ResetCommand') {
+      // const { board } = this._game.board;
+      if (!this.board) {
+        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      }
+      this.game?.reset();
+      this._emitAreaChanged();
+      return undefined as InteractableCommandReturnType<CommandType>;
+    }
+    throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
   }
 }
