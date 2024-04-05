@@ -164,7 +164,7 @@ export type ConnectFourColor = 'Red' | 'Yellow';
 export type InteractableID = string;
 export type GameInstanceID = string;
 
-export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard';
+export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard' | 'No difficulty';
 
 export type PictionaryTeamLetter = 'A' | 'B';
 
@@ -182,7 +182,7 @@ export interface PictionaryGameState extends WinnableGameState {
   drawer?: PlayerID;
   guesser?: PlayerID;
   word?: string;
-  difficulty?: PictionaryWordDifficulty;
+  difficulty: PictionaryWordDifficulty;
   teamA: PictionaryTeam;
   teamB: PictionaryTeam;
   teamAReady?: boolean;
@@ -190,8 +190,10 @@ export interface PictionaryGameState extends WinnableGameState {
   usedWords: string[];
   timer: number;
   round: number;
-  board: WhiteBoardArea;
+  // board: WhiteBoardArea;
   guess?: string;
+  board:  Color[][] | undefined;
+  // currentColor: Color;
 }
 
 /**
@@ -270,7 +272,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | ResetCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | ResetCommand | PictionaryStartGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -285,6 +287,11 @@ export interface LeaveGameCommand {
 export interface StartGameCommand {
   type: 'StartGame';
   gameID: GameInstanceID;
+}
+export interface PictionaryStartGameCommand {
+  type: 'PictionaryStartGame';
+  gameID: GameInstanceID;
+  difficulty: PictionaryWordDifficulty;
 }
 export interface GameMoveCommand<MoveType> {
   type: 'GameMove';
@@ -314,6 +321,7 @@ export type InteractableCommandReturnType<CommandType extends InteractableComman
   CommandType extends DrawCommand ? undefined :
   CommandType extends EraseCommand ? undefined :
   CommandType extends ResetCommand ? undefined :
+  CommandType extends PictionaryStartGameCommand ? undefined :
   never;
 
 export type InteractableCommandResponse<MessageType> = {

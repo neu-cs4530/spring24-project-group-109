@@ -1,7 +1,9 @@
 import { Color } from '../../../../types/CoveyTownSocket';
 import React from 'react';
 
-// TODO: JAVA DOCS
+/**
+ * The type of the context that provides the color options for the Pictionary game
+ */
 export type PictionaryColorOptionsType = {
   color: Color;
   setColor: (color: Color) => void;

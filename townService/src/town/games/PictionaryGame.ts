@@ -4,14 +4,25 @@ import InvalidParametersError, {
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  GAME_NOT_STARTABLE_MESSAGE,
+  INVALID_DRAW_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
-import { GameMove, PictionaryGameState, PictionaryMove } from '../../types/CoveyTownSocket';
-import WhiteBoardArea from '../WhiteBoardArea';
+import {
+  Color,
+  GameMove,
+  PictionaryGameState,
+  PictionaryMove,
+  PictionaryWordDifficulty,
+  Pixel,
+} from '../../types/CoveyTownSocket';
+// import WhiteBoardArea from '../WhiteBoardArea';
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
 const ROUND_TIME = 60; // seconds
+const WHITEBOARD_HEIGHT = 35;
+const WHITEBOARD_WIDTH = 50;
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
@@ -25,7 +36,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       drawer: undefined,
       guesser: undefined,
       word: undefined,
-      difficulty: undefined, // Default difficulty as 'Easy' (Ashna edit: there should not be a default so the game doesn't auto start)
+      difficulty: 'No difficulty',
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       teamAReady: false,
@@ -34,10 +45,84 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       timer: ROUND_TIME, // seconds
       round: 0,
       status: 'WAITING_FOR_PLAYERS',
-      board: new WhiteBoardArea(),
+      // board: new WhiteBoardArea(),
+      board: undefined,
       guess: undefined,
+      // currentColor: '#000000',
     });
     this._wordList = EASY_WORDS;
+    this.state.board = this._getBoard();
+  }
+
+  /**
+   * Draws a given drawing on the whiteboard. The drawing is a list of pixels.
+   * @param drawing The drawing to be drawn on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void and updates the whiteboard.
+   */
+  public draw(drawing: Pixel[]): void {
+    drawing.forEach((pixel: Pixel) => {
+      if (
+        pixel.x < 0 ||
+        pixel.x >= WHITEBOARD_HEIGHT ||
+        pixel.y < 0 ||
+        pixel.y >= WHITEBOARD_WIDTH
+      ) {
+        throw new InvalidParametersError(INVALID_DRAW_MESSAGE);
+      }
+    });
+    drawing.forEach((pixel: Pixel) => {
+      if (this.state.board) {
+        this.state.board[pixel.x][pixel.y] = pixel.color;
+        // this.state.currentColor = pixel.color;
+        console.log(`Drawing at ${pixel.x}, ${pixel.y}, color: ${pixel.color}`);
+        console.log(this.state.board[pixel.x][pixel.y]);
+      }
+    });
+  }
+
+  /**
+   * Erase a given drawing on the whiteboard. The drawing is a list of pixels.
+   * @param drawing The drawing to be erased on the whiteboard.
+   * @throws InvalidParametersError if the drawing is out of bounds.
+   * @returns void and updates the whiteboard.
+   */
+  public erase(drawing: Pixel[]): void {
+    drawing.forEach((pixel: Pixel) => {
+      if (
+        pixel.x < 0 ||
+        pixel.x >= WHITEBOARD_HEIGHT ||
+        pixel.y < 0 ||
+        pixel.y >= WHITEBOARD_WIDTH
+      ) {
+        throw new InvalidParametersError(INVALID_DRAW_MESSAGE);
+      }
+    });
+    drawing.forEach((pixel: Pixel) => {
+      if (this.state.board) {
+        this.state.board[pixel.x][pixel.y] = `#${'FFFFFF'}`;
+        // this.state.currentColor = `#${'FFFFFF'}`;
+      }
+    });
+  }
+
+  /**
+   * Reset the whiteboard to its initial blank state.
+   */
+  public reset(): void {
+    this.state.board = this._getBoard();
+  }
+
+  private _getBoard(): Color[][] {
+    const board: Color[][] = [];
+    for (let i = 0; i < WHITEBOARD_HEIGHT; i += 1) {
+      const row: Color[] = [];
+      for (let j = 0; j < WHITEBOARD_WIDTH; j += 1) {
+        row.push(`#${'FFFFFF'}`);
+      }
+      board.push(row);
+    }
+    return board;
   }
 
   private _assignNewRoles(): void {
@@ -64,6 +149,13 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public tickDown(): void {
     if (this.state.round === 4) {
+      if (this.state.teamA.score > this.state.teamB.score) {
+        this.state.winner = 'A';
+      } else if (this.state.teamA.score < this.state.teamB.score) {
+        this.state.winner = 'B';
+      } else {
+        this.state.winner = ' ';
+      }
       this.state = { ...this.state, status: 'OVER' };
     } else if (this.state.status === 'IN_PROGRESS') {
       if (this.state.timer > 0) {
@@ -71,6 +163,10 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       } else if (this.state.timer === 0) {
         this.state = { ...this.state, timer: ROUND_TIME, round: this.state.round + 1 };
         this._assignNewRoles();
+        this.state.word = this._chooseWord();
+        this.reset();
+        this.state.guess = undefined;
+        // this.state.currentColor = '#000000';
       }
     }
   }
@@ -87,7 +183,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    */
   public applyMove(move: GameMove<PictionaryMove>): void {
     const guess: PictionaryMove = move.move;
-    this.state.guess = move.move.guess;
+    this.state.guess = guess.guess;
     if (this.state.status !== 'IN_PROGRESS') {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
@@ -101,24 +197,28 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
     // correct guess case
-    if (guess.guess.toLowerCase() === this.state.word?.toLowerCase()) {
-      const team = this.state.drawer ? this.state.teamA : this.state.teamB;
-      if (team === this.state.teamA) {
-        this.state = {
-          ...this.state,
-          status: 'IN_PROGRESS',
-          teamA: { ...team, score: team.score + 1 },
-          usedWords: [...this.state.usedWords, this.state.word],
-          word: this._chooseWord(),
-        };
-      } else {
-        this.state = {
-          ...this.state,
-          status: 'IN_PROGRESS',
-          teamB: { ...team, score: team.score + 1 },
-          usedWords: [...this.state.usedWords, this.state.word],
-          word: this._chooseWord(),
-        };
+    if (this.state.guess.toLowerCase() === this.state.word?.toLowerCase()) {
+      if (this.state.drawer) {
+        const team = this.state.teamA.players.includes(this.state.drawer)
+          ? this.state.teamA
+          : this.state.teamB;
+        if (team === this.state.teamA) {
+          this.state = {
+            ...this.state,
+            status: 'IN_PROGRESS',
+            teamA: { ...team, score: team.score + 1 },
+            usedWords: [...this.state.usedWords, this.state.word],
+            word: this._chooseWord(),
+          };
+        } else {
+          this.state = {
+            ...this.state,
+            status: 'IN_PROGRESS',
+            teamB: { ...team, score: team.score + 1 },
+            usedWords: [...this.state.usedWords, this.state.word],
+            word: this._chooseWord(),
+          };
+        }
       }
     }
   }
@@ -167,14 +267,21 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
-        status: 'IN_PROGRESS',
+        status: 'WAITING_TO_START',
       };
     }
   }
 
-  protected _startGame(difficulty: string): void {
-    // const { difficulty } = this.state;
+  /**
+   * Starts the game with the given difficulty.
+   * Updates the game's state to reflect the new game.
+   * @param difficulty The difficulty of the game
+   */
+  public startGame(difficulty: PictionaryWordDifficulty): void {
     // get a random word from the PictionaryDictionary array based on the difficulty
+    if (this.state.status !== 'WAITING_TO_START') {
+      throw new InvalidParametersError(GAME_NOT_STARTABLE_MESSAGE);
+    }
     if (difficulty === 'Easy') {
       this._wordList = EASY_WORDS;
     } else if (difficulty === 'Medium') {
@@ -183,6 +290,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       this._wordList = HARD_WORDS;
     }
     this._assignNewRoles();
+    this.state = {
+      ...this.state,
+      status: 'IN_PROGRESS',
+      difficulty,
+      word: this._chooseWord(),
+    };
   }
 
   /**

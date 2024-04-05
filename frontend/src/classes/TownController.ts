@@ -633,10 +633,9 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
             this._interactableControllers.push(
               new ConnectFourAreaController(eachInteractable.id, eachInteractable, this),
             );
-          }
-            else if (isPictionaryArea(eachInteractable)) {
-              this._interactableControllers.push(
-                new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
+          } else if (isPictionaryArea(eachInteractable)) {
+            this._interactableControllers.push(
+              new PictionaryAreaController(eachInteractable.id, eachInteractable, this),
             );
           }
         });

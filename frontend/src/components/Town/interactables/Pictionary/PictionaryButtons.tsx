@@ -4,29 +4,33 @@ import useTownController from '../../../../hooks/useTownController';
 import { useContext } from 'react';
 import pictionaryColorOptions, { PictionaryColorOptionsType } from './PictionaryBoardContext';
 
-// TODO: CHECK ASYNC (NEEDED FOR RESET)
+/**
+ * Component that renders the erase and reset buttons for the Pictionary whiteboard
+ */
 function PictionaryButtons({ pictionaryAreaController }: PictionaryGameProps): JSX.Element {
   const { color } = useContext(pictionaryColorOptions) as PictionaryColorOptionsType;
   const townController = useTownController();
-  let eraseButton = <></>;
-  let resetButton = <></>;
+  // const eraseButton = (
+  //   <Button
+  //     onClick={async () => {
+  //       ({ color } = '#FFFFFF');
+  //     }}>
+  //     Erase Button
+  //   </Button>
+  // );
+  const resetButton = (
+    <Button
+      onClick={async () => {
+        await pictionaryAreaController.reset();
+      }}>
+      ResetButton
+    </Button>
+  );
   return (
     <>
       {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id &&
-        (eraseButton = (
-          <button>
-            {color} = {`#${'FFFFFF'}`}
-            Erase Button
-          </button>
-        )) &&
-        (resetButton = (
-          <button
-            onClick={async () => {
-              await pictionaryAreaController.reset();
-            }}>
-            ResetButton
-          </button>
-        ))}
+        // eraseButton &&
+        resetButton}
     </>
   );
 }
