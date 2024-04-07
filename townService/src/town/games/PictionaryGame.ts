@@ -20,7 +20,7 @@ import {
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
-const ROUND_TIME = 60; // seconds
+const ROUND_TIME = 1; // seconds
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
 
@@ -39,8 +39,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       difficulty: 'No difficulty',
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
-      teamAReady: false,
-      teamBReady: false,
       usedWords: [],
       timer: ROUND_TIME, // seconds
       round: 0,
@@ -156,7 +154,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       } else {
         this.state.winner = ' ';
       }
-      this.state = { ...this.state, status: 'OVER' };
+      this.reset();
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+      };
     } else if (this.state.status === 'IN_PROGRESS') {
       if (this.state.timer > 0) {
         this.state = { ...this.state, timer: this.state.timer - 1 };
@@ -251,12 +253,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (teamAPlayers.includes(player.id) || teamBPlayers.includes(player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (teamAPlayers.length < 2) {
+    if (teamAPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamA: { ...teamA, players: [...teamAPlayers, player.id] },
       };
-    } else if (teamBPlayers.length < 2) {
+    } else if (teamBPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamB: { ...teamB, players: [...teamBPlayers, player.id] },
@@ -264,7 +266,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
+    if (this.state.teamA.players.length === 1 && this.state.teamB.players.length === 1) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',

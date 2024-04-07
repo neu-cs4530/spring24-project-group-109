@@ -185,8 +185,6 @@ export interface PictionaryGameState extends WinnableGameState {
   difficulty: PictionaryWordDifficulty;
   teamA: PictionaryTeam;
   teamB: PictionaryTeam;
-  teamAReady?: boolean;
-  teamBReady?: boolean;
   usedWords: string[];
   timer: number;
   round: number;
