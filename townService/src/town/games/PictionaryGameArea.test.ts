@@ -24,6 +24,7 @@ import { EASY_WORDS } from './PictionaryDictionary';
 
 class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordList: string[];
+
   public constructor() {
     super({
       word: 'test',
