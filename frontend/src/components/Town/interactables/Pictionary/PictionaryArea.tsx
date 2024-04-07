@@ -65,7 +65,7 @@ export default function PictionaryArea({
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [timer]);
+  }, [timer, pictionaryAreaController]);
 
   //for updating round state
   useEffect(() => {
