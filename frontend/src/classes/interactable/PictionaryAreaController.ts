@@ -235,6 +235,15 @@ export default class PictionaryAreaController extends GameAreaController<
   }
 
   /**
+   * Sends a request to the server to tick down the timer
+   */
+  public async tickDown() {
+    await this._sendInteractableCommandHelper({
+      type: 'TickDown',
+    });
+  }
+
+  /**
    * Sends a request to the server to reset the whiteboard
    */
   public async reset() {
