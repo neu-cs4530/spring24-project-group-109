@@ -16,10 +16,8 @@ import {
   InteractableType,
   PictionaryGameState,
 } from '../../types/CoveyTownSocket';
-import PictionaryGame from './PictionaryGame';
 import GameArea from './GameArea';
-import Game from './Game';
-// import WhiteBoardArea from '../WhiteBoardArea';
+import PictionaryGame from './PictionaryGame';
 
 /**
  * The PictionaryGameArea class is responsible for managing the state of a single game area for Pictionary.
@@ -64,17 +62,17 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
           this._history.push({
             gameID,
             scores: {
-              [teamAFirstPlayerName + ', ' + teamASecondPlayerName]: updatedState.state.winner === teamA ? 1 : 0,
-              [teamBFirstPlayerName + ', ' + teamBSecondPlayerName]: updatedState.state.winner === teamB ? 1 : 0,
-            }
+              [`${teamAFirstPlayerName}, ${teamASecondPlayerName}`]:
+                updatedState.state.winner === teamA ? 1 : 0,
+              [`${teamBFirstPlayerName}, ${teamBSecondPlayerName}`]:
+                updatedState.state.winner === teamB ? 1 : 0,
+            },
           });
         }
       }
     }
     this._emitAreaChanged();
   }
-          
-    
 
   /**
    * Handle a command from a player in this game area.
@@ -99,8 +97,6 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    // const whiteboardArea = new WhiteBoardArea();
-    // this.game?.tickDown();
     this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
@@ -161,34 +157,35 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
       this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
-    if (command.type === 'DrawCommand') {
-      const drawCommand = command as DrawCommand;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+    if (this._game?.state.drawer === player.id) {
+      if (command.type === 'DrawCommand') {
+        const drawCommand = command as DrawCommand;
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.draw(drawCommand.drawing);
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.draw(drawCommand.drawing);
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
-    }
-    if (command.type === 'EraseCommand') {
-      const drawCommand = command as EraseCommand;
-      // const { board } = this.board;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      if (command.type === 'EraseCommand') {
+        const drawCommand = command as EraseCommand;
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.erase(drawCommand.drawing);
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.erase(drawCommand.drawing);
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
-    }
-    if (command.type === 'ResetCommand') {
-      // const { board } = this._game.board;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      if (command.type === 'ResetCommand') {
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.reset();
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.reset();
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
+      throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
     }
-    throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
+    throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }
