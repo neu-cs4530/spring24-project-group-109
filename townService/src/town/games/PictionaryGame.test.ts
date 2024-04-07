@@ -70,7 +70,7 @@ describe('PictionaryGame', () => {
         game.join(player3);
         expect(game.state.status).toEqual('WAITING_FOR_PLAYERS');
         game.join(player4);
-        expect(game.state.status).toEqual('IN_PROGRESS');
+        expect(game.state.status).toEqual('WAITING_TO_START');
         expect(game.state.winner).toBeUndefined();
       });
     });
@@ -150,6 +150,7 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
+        game.startGame('Easy');
         const move: GameMove<PictionaryMove> = {
           gameID: game.id,
           playerID: player2.id,
@@ -166,6 +167,7 @@ describe('PictionaryGame', () => {
         game.join(player2);
         game.join(player3);
         game.join(player4);
+        game.startGame('Easy');
         // should not need the line below... state does not change in join game
         const move: GameMove<PictionaryMove> = {
           gameID: game.id,
@@ -190,7 +192,8 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
-        expect(game.state.status).toEqual('IN_PROGRESS');
+        expect(game.state.status).toEqual('WAITING_TO_START');
+        game.startGame('Easy');
       });
       it('should update the team score', () => {
         game.state.word = 'test';
@@ -242,10 +245,12 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
+        expect(game.state.status).toEqual('WAITING_TO_START');
+        game.startGame('Easy');
         expect(game.state.status).toEqual('IN_PROGRESS');
       });
       it('ends the game if the round is equal to 4', () => {
-        game.state.round = 4;
+        game.state.round = 5;
         game.tickDown();
         expect(game.state.status).toEqual('OVER');
       });
