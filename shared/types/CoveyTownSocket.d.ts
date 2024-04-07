@@ -86,7 +86,7 @@ export interface GameState {
  * Type for the state of a game that can be won
  */
 export interface WinnableGameState extends GameState {
-  winner?: PlayerID;
+  winner?: PlayerID | PictionaryTeam;
 }
 /**
  * Base type for a move in a game. Implementers should also extend MoveType
@@ -185,8 +185,6 @@ export interface PictionaryGameState extends WinnableGameState {
   difficulty: PictionaryWordDifficulty;
   teamA: PictionaryTeam;
   teamB: PictionaryTeam;
-  teamAReady?: boolean;
-  teamBReady?: boolean;
   usedWords: string[];
   timer: number;
   round: number;
@@ -272,13 +270,17 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | ResetCommand | PictionaryStartGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | TickDownCommand | ResetCommand | PictionaryStartGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
 }
 export interface JoinGameCommand {
   type: 'JoinGame';
+}
+
+export interface TickDownCommand {
+  type: 'TickDown';
 }
 export interface LeaveGameCommand {
   type: 'LeaveGame';

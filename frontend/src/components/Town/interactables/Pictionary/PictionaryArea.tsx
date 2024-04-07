@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import useTownController from '../../../../hooks/useTownController';
-import { Color, GameResult, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
+import { Color, GameStatus, InteractableID } from '../../../../types/CoveyTownSocket';
 import PlayerController from '../../../../classes/PlayerController';
 import { Button, Container, Flex, Heading, Input, useToast } from '@chakra-ui/react';
 import pictionaryColorOptions from './PictionaryBoardContext';
@@ -11,6 +11,34 @@ import PictionaryColor from './PictionaryColor';
 import PictionaryButtons from './PictionaryButtons';
 import { List, ListItem } from '@chakra-ui/react';
 
+/**
+ * The PictionaryArea component renders the Pictionary game area.
+ * It renders the current state of the area, optionally allowing the player to join the game.
+ *
+ * It uses Chakra-UI components (does not use other GUI widgets)
+ *
+ * It uses the PictionaryAreaController to get the current state of the game.
+ * It listens for the 'gameUpdated' and 'gameEnd' events on the controller, and re-renders accordingly.
+ * It subscribes to these events when the component mounts, and unsubscribes when the component unmounts. It also unsubscribes when the gameAreaController changes.
+ *
+ * It renders the following:
+ * - A list of players' id and what team they are assigned to
+ *    - If there is no player in the game, the username is '(No player yet!)'
+ * - A message indicating the current game status:
+ *    - If the game is in progress, the message is 'Game in progress, whose turn it is, the round number, the timer, and each team's score.
+ *    - Otherwise the message is 'Game {not yet started | over}.'
+ * - If the game is in status WAITING_TO_START, 3 different buttons are displayed to select the difficulty of the game
+ *    - Clicking the button calls the startGame method on the gameAreaController
+ *    - Before calling startGame method, the button is disabled and has the property isLoading set to true, and is re-enabled when the method call completes
+ *    - If the method call fails, a toast is displayed with the error message as the description of the toast (and status 'error')
+ *    - Once the player joins the game, the button dissapears
+ * - The PictionaryBoard component, which is passed the current gameAreaController as a prop
+ *
+ * - When the game ends, a toast is displayed with the result of the game:
+ *    - Tie: description 'Game ended in a tie'
+ *    - Our player won: description 'Winner: Team A/B'
+ *
+ */
 export default function PictionaryArea({
   interactableID,
 }: {
@@ -37,14 +65,12 @@ export default function PictionaryArea({
   const [word, setWord] = useState<string>(pictionaryAreaController.getWord());
   const [guess, setGuess] = useState<string>(pictionaryAreaController.getGuess());
 
-  // const [aScore, setAScore] = useState<number>(pictionaryAreaController.getTeamAScore());
-  // const [bScore, setBScore] = useState<number>(pictionaryAreaController.getTeamBScore());
-
   const [joiningGame, setJoiningGame] = useState(false);
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+  //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+  const [timer, setTimer] = useState<number>(60);
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
 
@@ -52,9 +78,23 @@ export default function PictionaryArea({
 
   // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
 
+  //for updating the timer every second of the game
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer(timer - 1);
+        pictionaryAreaController.tickDown();
+      } else if (timer <= 0) {
+        pictionaryAreaController.tickDown();
+        setTimer(60);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer, pictionaryAreaController]);
+
   //for updating round state
   useEffect(() => {
-    console.log('enter use effect');
+    //console.log('enter use effect');
     const updateGameState = () => {
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
@@ -66,7 +106,6 @@ export default function PictionaryArea({
       setGameStatus(pictionaryAreaController.status);
       setBoard(pictionaryAreaController.board);
       setTimer(pictionaryAreaController.getTimer());
-      // setColor(pictionaryAreaController.getColor());
     };
     const onGameEnd = () => {
       const winner = pictionaryAreaController.winner;
@@ -84,45 +123,37 @@ export default function PictionaryArea({
         });
       }
     };
-    console.log('before game updating');
+    //console.log('before game updating');
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
-      console.log('after game updating');
+      //console.log('after game updating');
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
       pictionaryAreaController.removeListener('gameEnd', onGameEnd);
     };
   }, [townController, pictionaryAreaController, toast]);
 
-  let gameStatusText = <></>;
-
-  if (gameStatus === 'WAITING_FOR_PLAYERS') {
-    const joinGameButton = (
-      <Button
-        onClick={async () => {
-          setJoiningGame(true);
-          try {
-            await pictionaryAreaController.joinGame();
-          } catch (e) {
-            console.error(e);
-            toast({
-              title: 'Error joining test game',
-              description: (e as Error).toString(),
-              status: 'error',
-            });
-          }
-          setJoiningGame(false);
-        }}
-        isLoading={joiningGame}
-        disabled={joiningGame}>
-        Join New Game
-      </Button>
-    );
-    gameStatusText = <b>{joinGameButton}</b>;
-    // if (gameStatus === 'WAITING_TO_START') {
-    //   gameStatusText = <b>Game in {gameStatus}</b>;
-    // }
-  }
+  const joinGameButton = (
+    <Button
+      onClick={async () => {
+        setJoiningGame(true);
+        try {
+          await pictionaryAreaController.joinGame();
+        } catch (e) {
+          console.error(e);
+          toast({
+            title: 'Error joining test game',
+            description: (e as Error).toString(),
+            status: 'error',
+          });
+        }
+        setJoiningGame(false);
+      }}
+      isLoading={joiningGame}
+      disabled={joiningGame}>
+      Join New Game
+    </Button>
+  );
   const gameStatusTextPlayers = (
     <>
       Game is{' '}
@@ -151,9 +182,10 @@ export default function PictionaryArea({
 
   return (
     <Heading size='s'>
-      {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ? (
+      {pictionaryAreaController.status === 'WAITING_FOR_PLAYERS' ||
+      pictionaryAreaController.status === 'OVER' ? (
         <>
-          {gameStatusText}
+          {joinGameButton}
           <List aria-label='list of players in the game'>
             <ListItem>
               Team A: {teamA.map(id => id?.userName + ', ').join('\n') || '(No player yet!)\n'}
@@ -163,9 +195,8 @@ export default function PictionaryArea({
             </ListItem>
           </List>
         </>
-      ) : (pictionaryAreaController.status === 'WAITING_TO_START' &&
-          pictionaryAreaController.getDifficulty() === 'No difficulty') ||
-        pictionaryAreaController.status === 'OVER' ? (
+      ) : pictionaryAreaController.status === 'WAITING_TO_START' &&
+        pictionaryAreaController.getDifficulty() === 'No difficulty' ? (
         <Flex flexDirection='column'>
           {gameStatusTextPlayers}
           <br />
@@ -239,7 +270,6 @@ export default function PictionaryArea({
                 <PictionaryBoard
                   pictionaryAreaController={pictionaryAreaController}></PictionaryBoard>
               </div>
-              {console.log(board)}
               <Flex flexDirection='row'>
                 {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id ? (
                   <PictionaryColor></PictionaryColor>

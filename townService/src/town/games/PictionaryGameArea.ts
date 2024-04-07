@@ -10,13 +10,14 @@ import {
   Color,
   DrawCommand,
   EraseCommand,
+  GameInstance,
   InteractableCommand,
   InteractableCommandReturnType,
   InteractableType,
+  PictionaryGameState,
 } from '../../types/CoveyTownSocket';
-import PictionaryGame from './PictionaryGame';
 import GameArea from './GameArea';
-// import WhiteBoardArea from '../WhiteBoardArea';
+import PictionaryGame from './PictionaryGame';
 
 /**
  * The PictionaryGameArea class is responsible for managing the state of a single game area for Pictionary.
@@ -33,6 +34,44 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
 
   get board(): Color[][] {
     return this._game?.state.board ?? [];
+  }
+
+  private _stateUpdated(updatedState: GameInstance<PictionaryGameState>) {
+    if (updatedState.state.status === 'OVER') {
+      // If we haven't yet recorded the outcome, do so now.
+      const gameID = this._game?.id;
+      if (gameID && !this._history.find(eachResult => eachResult.gameID === gameID)) {
+        const { teamA, teamB } = updatedState.state;
+        if (teamA && teamB) {
+          // get first player's name on team A
+          const teamAFirstPlayerName = this._occupants.find(
+            eachPlayer => eachPlayer.id === teamA.players[0],
+          )?.userName;
+          // get second player's name on team A
+          const teamASecondPlayerName = this._occupants.find(
+            eachPlayer => eachPlayer.id === teamA.players[1],
+          )?.userName;
+          // get first player's name on team B
+          const teamBFirstPlayerName = this._occupants.find(
+            eachPlayer => eachPlayer.id === teamB.players[0],
+          )?.userName;
+          // get second player's name on team B
+          const teamBSecondPlayerName = this._occupants.find(
+            eachPlayer => eachPlayer.id === teamB.players[1],
+          )?.userName;
+          this._history.push({
+            gameID,
+            scores: {
+              [`${teamAFirstPlayerName}, ${teamASecondPlayerName}`]:
+                updatedState.state.winner === teamA ? 1 : 0,
+              [`${teamBFirstPlayerName}, ${teamBSecondPlayerName}`]:
+                updatedState.state.winner === teamB ? 1 : 0,
+            },
+          });
+        }
+      }
+    }
+    this._emitAreaChanged();
   }
 
   /**
@@ -58,8 +97,6 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    // const whiteboardArea = new WhiteBoardArea();
-    this.game?.tickDown();
     this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
@@ -78,9 +115,16 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
           playerID: player.id,
           move: command.move,
         });
-        this._emitAreaChanged();
+        this._stateUpdated(game.toModel());
         return undefined as InteractableCommandReturnType<CommandType>;
       }
+    }
+    if (command.type === 'TickDown') {
+      const game = this._game;
+      if (!game) {
+        throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      game.tickDown();
     }
     if (command.type === 'PictionaryStartGame') {
       const game = this._game;
@@ -88,7 +132,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       game.startGame(command.difficulty);
-      this._emitAreaChanged();
+      this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'JoinGame') {
@@ -98,7 +142,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         this._game = game;
       }
       game.join(player);
-      this._emitAreaChanged();
+      this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
     if (command.type === 'LeaveGame') {
@@ -110,37 +154,38 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
       game.leave(player);
-      this._emitAreaChanged();
+      this._stateUpdated(game.toModel());
       return undefined as InteractableCommandReturnType<CommandType>;
     }
-    if (command.type === 'DrawCommand') {
-      const drawCommand = command as DrawCommand;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+    if (this._game?.state.drawer === player.id) {
+      if (command.type === 'DrawCommand') {
+        const drawCommand = command as DrawCommand;
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.draw(drawCommand.drawing);
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.draw(drawCommand.drawing);
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
-    }
-    if (command.type === 'EraseCommand') {
-      const drawCommand = command as EraseCommand;
-      // const { board } = this.board;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      if (command.type === 'EraseCommand') {
+        const drawCommand = command as EraseCommand;
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.erase(drawCommand.drawing);
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.erase(drawCommand.drawing);
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
-    }
-    if (command.type === 'ResetCommand') {
-      // const { board } = this._game.board;
-      if (!this.board) {
-        throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+      if (command.type === 'ResetCommand') {
+        if (!this.board) {
+          throw new InvalidParametersError(INVALID_BOARD_MESSAGE);
+        }
+        this.game?.reset();
+        this._emitAreaChanged();
+        return undefined as InteractableCommandReturnType<CommandType>;
       }
-      this.game?.reset();
-      this._emitAreaChanged();
-      return undefined as InteractableCommandReturnType<CommandType>;
+      throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
     }
-    throw new InvalidParametersError(INVALID_DRAWER_MESSAGE);
+    throw new InvalidParametersError(INVALID_COMMAND_MESSAGE);
   }
 }

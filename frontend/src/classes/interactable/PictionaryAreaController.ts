@@ -235,6 +235,15 @@ export default class PictionaryAreaController extends GameAreaController<
   }
 
   /**
+   * Sends a request to the server to tick down the timer
+   */
+  public async tickDown() {
+    await this._sendInteractableCommandHelper({
+      type: 'TickDown',
+    });
+  }
+
+  /**
    * Sends a request to the server to reset the whiteboard
    */
   public async reset() {
@@ -252,7 +261,7 @@ export default class PictionaryAreaController extends GameAreaController<
     if (newModel) {
       // if board has changed (ex. new drawing)
       if (oldModel.game?.state.board !== newModel.game?.state.board) {
-        console.log('board changed');
+        //console.log('board changed');
         if (this._board) {
           this._board = newModel.game?.state.board ?? [];
         }
@@ -260,7 +269,7 @@ export default class PictionaryAreaController extends GameAreaController<
         for (const pixel of this._board) {
           for (const eachPixel of pixel) {
             if (eachPixel !== '#FFFFFF') {
-              console.log(`Drawing at color: ${eachPixel}`);
+              //console.log(`Drawing at color: ${eachPixel}`);
             }
           }
         }
