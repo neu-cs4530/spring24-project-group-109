@@ -1,4 +1,4 @@
-import { Table, Tbody, Td, Thead, Tr } from '@chakra-ui/react';
+import { Table, Tbody, Td, Thead, Tr, Th } from '@chakra-ui/react';
 import React from 'react';
 import { GameResult } from '../../../types/CoveyTownSocket';
 
@@ -70,23 +70,23 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
   const rows = Object.keys(winsLossesTiesByPlayer).map(player => winsLossesTiesByPlayer[player]);
   rows.sort((a, b) => b.wins - a.wins);
   return (
-    <Table>
+    <Table size="sm"> {/* You can adjust the size of the table */}
       <Thead>
         <Tr>
-          <th>Player</th>
-          <th>Wins</th>
-          <th>Losses</th>
-          <th>Ties</th>
+          <Th fontSize="sm">Player</Th> {/* Adjust the font size here */}
+          <Th fontSize="sm">Wins</Th>
+          <Th fontSize="sm">Losses</Th>
+          <Th fontSize="sm">Ties</Th>
         </Tr>
       </Thead>
       <Tbody>
         {rows.map(record => {
           return (
             <Tr key={record.player}>
-              <Td>{record.player}</Td>
-              <Td>{record.wins}</Td>
-              <Td>{record.losses}</Td>
-              <Td>{record.ties}</Td>
+              <Td fontSize="sm" isTruncated maxWidth="150px">{record.player}</Td> {/* Example of font size and max width with text truncation */}
+              <Td fontSize="sm">{record.wins}</Td>
+              <Td fontSize="sm">{record.losses}</Td>
+              <Td fontSize="sm">{record.ties}</Td>
             </Tr>
           );
         })}
