@@ -69,7 +69,8 @@ export default function PictionaryArea({
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+  //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
+  const [timer, setTimer] = useState<number>(60);
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
 
@@ -77,9 +78,23 @@ export default function PictionaryArea({
 
   // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
 
+  //for updating the timer every second of the game
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (timer > 0) {
+        setTimer(timer - 1);
+        pictionaryAreaController.tickDown();
+      } else if (timer <= 0) {
+        pictionaryAreaController.tickDown();
+        setTimer(60);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer, pictionaryAreaController]);
+
   //for updating round state
   useEffect(() => {
-    console.log('enter use effect');
+    //console.log('enter use effect');
     const updateGameState = () => {
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
@@ -108,11 +123,11 @@ export default function PictionaryArea({
         });
       }
     };
-    console.log('before game updating');
+    //console.log('before game updating');
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
-      console.log('after game updating');
+      //console.log('after game updating');
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
       pictionaryAreaController.removeListener('gameEnd', onGameEnd);
     };
@@ -255,7 +270,6 @@ export default function PictionaryArea({
                 <PictionaryBoard
                   pictionaryAreaController={pictionaryAreaController}></PictionaryBoard>
               </div>
-              {console.log(board)}
               <Flex flexDirection='row'>
                 {pictionaryAreaController.getDrawer()?.id === townController.ourPlayer.id ? (
                   <PictionaryColor></PictionaryColor>

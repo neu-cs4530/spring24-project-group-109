@@ -20,7 +20,8 @@ import {
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
-const ROUND_TIME = 1; // seconds
+const ROUND_TIME = 60; // seconds
+const MAX_ROUNDS = 4;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
 
@@ -41,7 +42,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
       timer: ROUND_TIME, // seconds
-      round: 0,
+      round: 1,
       status: 'WAITING_FOR_PLAYERS',
       // board: new WhiteBoardArea(),
       board: undefined,
@@ -72,9 +73,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     drawing.forEach((pixel: Pixel) => {
       if (this.state.board) {
         this.state.board[pixel.x][pixel.y] = pixel.color;
-        // this.state.currentColor = pixel.color;
-        console.log(`Drawing at ${pixel.x}, ${pixel.y}, color: ${pixel.color}`);
-        console.log(this.state.board[pixel.x][pixel.y]);
       }
     });
   }
@@ -146,7 +144,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the game is not full (GAME_NOT_STARTABLE_MESSAGE)
    */
   public tickDown(): void {
-    if (this.state.round === 4) {
+    if (this.state.round === MAX_ROUNDS + 1) {
       if (this.state.teamA.score > this.state.teamB.score) {
         this.state.winner = 'A';
       } else if (this.state.teamA.score < this.state.teamB.score) {
@@ -154,11 +152,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       } else {
         this.state.winner = ' ';
       }
-      this.reset();
       this.state = {
         ...this.state,
         status: 'OVER',
       };
+      this.reset();
     } else if (this.state.status === 'IN_PROGRESS') {
       if (this.state.timer > 0) {
         this.state = { ...this.state, timer: this.state.timer - 1 };
@@ -294,6 +292,10 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     this._assignNewRoles();
     this.state = {
       ...this.state,
+      teamA: { ...this.state.teamA, score: 0 },
+      teamB: { ...this.state.teamB, score: 0 },
+      timer: ROUND_TIME, // seconds
+      round: 1,
       status: 'IN_PROGRESS',
       difficulty,
       word: this._chooseWord(),
