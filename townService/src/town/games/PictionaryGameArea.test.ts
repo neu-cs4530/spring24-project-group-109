@@ -82,6 +82,10 @@ describe('PictionaryGameArea', () => {
       mock<TownEmitter>(),
     );
 
+    gameArea.add(player1);
+    game.join(player1);
+    gameArea.add(player2);
+    game.join(player2);
     interactableUpdateSpy = jest.spyOn(gameArea as any, '_emitAreaChanged');
   });
 
@@ -89,10 +93,59 @@ describe('PictionaryGameArea', () => {
     describe('JoinGame command', () => {
       it('should add the player to the existing game if already in progress', () => {
         gameArea.handleCommand({ type: 'JoinGame' }, player1);
-        interactableUpdateSpy.mockClear();
+        // interactableUpdateSpy.mockClear();
         gameArea.handleCommand({ type: 'JoinGame' }, player2);
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(2); // Adjusted to 2 calls
       });
     });
   });
 });
+
+describe('WhiteBoardArea', () => {
+    let gameArea: PictionaryGameArea;
+    let game: TestingGame; // makes a PictionaryGame
+    let player1: Player;
+    let interactableUpdateSpy: jest.SpyInstance;
+    let interactableUpdateSpyE: jest.SpyInstance;
+    let interactableUpdateSpyR: jest.SpyInstance;
+    const gameConstructorSpy = jest.spyOn(PictionaryGameModule, 'default');
+    beforeEach(() => {
+        
+      gameArea = new PictionaryGameArea(      
+        nanoid(),
+      { x: 0, y: 0, width: 100, height: 100 },
+      mock<TownEmitter>(),);
+      player1 = createPlayerForTesting();
+      interactableUpdateSpy = jest.spyOn(gameArea as any, '_emitAreaChanged');
+    //   interactableUpdateSpyE = jest.spyOn(gameArea, 'erase');
+    //   interactableUpdateSpyR = jest.spyOn(gameArea, 'reset');
+      game = new TestingGame();
+    gameConstructorSpy.mockReturnValue(game as unknown as PictionaryGame);
+      game.state.drawer = player1.id;
+    });
+    describe('handleCommand for draw', () => {
+      test('command should called', () => {
+        const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+        gameArea.handleCommand({ type: 'DrawCommand', drawing: [pixel] }, player1);
+        interactableUpdateSpy.mockClear();
+        expect(interactableUpdateSpy).toHaveBeenCalled();
+      });
+    });
+    describe('handleCommand for erase', () => {
+      test('command should called', () => {
+        const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+        interactableUpdateSpy.mockClear();
+        gameArea.handleCommand({ type: 'EraseCommand', drawing: [pixel] }, player1);
+        expect(interactableUpdateSpyE).toHaveBeenCalled();
+      });
+    });
+    describe('handleCommand for reset', () => {
+      test('command should called', () => {
+        const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+        interactableUpdateSpy.mockClear();
+        gameArea.handleCommand({ type: 'ResetCommand', drawing: [pixel] }, player1);
+        expect(interactableUpdateSpyR).toHaveBeenCalled();
+      });
+    });
+  });
+  
