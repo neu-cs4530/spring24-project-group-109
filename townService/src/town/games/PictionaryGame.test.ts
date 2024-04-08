@@ -5,10 +5,11 @@ import {
   MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
+  INVALID_DRAW_MESSAGE,
 } from '../../lib/InvalidParametersError';
 import PictionaryGame from './PictionaryGame';
 import Player from '../../lib/Player';
-import { GameMove, PictionaryMove } from '../../types/CoveyTownSocket';
+import { GameMove, PictionaryMove, Pixel } from '../../types/CoveyTownSocket';
 
 describe('PictionaryGame', () => {
   let game: PictionaryGame;
@@ -70,7 +71,7 @@ describe('PictionaryGame', () => {
         game.join(player3);
         expect(game.state.status).toEqual('WAITING_FOR_PLAYERS');
         game.join(player4);
-        expect(game.state.status).toEqual('IN_PROGRESS');
+        expect(game.state.status).toEqual('WAITING_TO_START');
         expect(game.state.winner).toBeUndefined();
       });
     });
@@ -150,6 +151,7 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
+        game.startGame('Easy');
         const move: GameMove<PictionaryMove> = {
           gameID: game.id,
           playerID: player2.id,
@@ -166,6 +168,7 @@ describe('PictionaryGame', () => {
         game.join(player2);
         game.join(player3);
         game.join(player4);
+        game.startGame('Easy');
         // should not need the line below... state does not change in join game
         const move: GameMove<PictionaryMove> = {
           gameID: game.id,
@@ -190,7 +193,8 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
-        expect(game.state.status).toEqual('IN_PROGRESS');
+        expect(game.state.status).toEqual('WAITING_TO_START');
+        game.startGame('Easy');
       });
       it('should update the team score', () => {
         game.state.word = 'test';
@@ -242,10 +246,12 @@ describe('PictionaryGame', () => {
         game.join(player3);
         game.join(player4);
         // should not need the line below... state does not change in join game
+        expect(game.state.status).toEqual('WAITING_TO_START');
+        game.startGame('Easy');
         expect(game.state.status).toEqual('IN_PROGRESS');
       });
       it('ends the game if the round is equal to 4', () => {
-        game.state.round = 4;
+        game.state.round = 5;
         game.tickDown();
         expect(game.state.status).toEqual('OVER');
       });
@@ -264,6 +270,86 @@ describe('PictionaryGame', () => {
         expect(game.state.drawer).toEqual(player2.id);
         expect(game.state.guesser).toEqual(player1.id);
       });
+    });
+  });
+  describe('board tests', () => {
+    let player1: Player;
+    let player2: Player;
+    let player3: Player;
+    let player4: Player;
+    beforeEach(() => {
+      player1 = createPlayerForTesting();
+      player2 = createPlayerForTesting();
+      player3 = createPlayerForTesting();
+      player4 = createPlayerForTesting();
+      game.join(player1);
+      game.join(player2);
+      game.join(player3);
+      game.join(player4);
+      // should not need the line below... state does not change in join game
+      expect(game.state.status).toEqual('WAITING_TO_START');
+      game.startGame('Easy');
+      expect(game.state.status).toEqual('IN_PROGRESS');
+    });
+    it('should create a new whiteboard', () => {
+      expect(game.state.board?.length).toEqual(35);
+    });
+    it('should draw a pixel on the whiteboard', () => {
+      const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+      game.draw([pixel]);
+      expect(game.state.board?.[0][0]).toBe(`#${'0000FF'}`);
+    });
+    it('should draw pixels on the whiteboard', () => {
+      const pixels: Pixel[] = [0, 1, 2, 3, 4, 5].map(posn => ({
+        x: posn,
+        y: posn,
+        color: `#${'0000FF'}`,
+      }));
+      game.draw(pixels);
+      [0, 1, 2, 3, 4, 5].forEach(posn =>
+        expect(game.state.board?.[posn][posn]).toBe(`#${'0000FF'}`),
+      );
+    });
+    it('should erase a pixel on the whiteboard', () => {
+      const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+      game.draw([pixel]);
+      game.erase([pixel]);
+      expect(game.state.board?.[0][0]).toBe('#FFFFFF');
+    });
+    it('should erase pixels on the whiteboard', () => {
+      const pixels: Pixel[] = [0, 1, 2, 3, 4, 5].map(posn => ({
+        x: posn,
+        y: posn,
+        color: `#${'0000FF'}`,
+      }));
+      game.draw(pixels);
+      game.erase(pixels);
+      [0, 1, 2, 3, 4, 5].forEach(posn =>
+        expect(game.state.board?.[posn][posn]).toBe(`#${'FFFFFF'}`),
+      );
+    });
+    it('should reset the whiteboard', () => {
+      const pixels: Pixel[] = [0, 1, 2, 3, 4, 5].map(posn => ({
+        x: posn,
+        y: posn,
+        color: `#${'0000FF'}`,
+      }));
+      game.draw(pixels);
+      game.reset();
+      game.state.board?.forEach(row => {
+        row.forEach(pixel => {
+          expect(pixel).toBe(`#${'FFFFFF'}`);
+        });
+      });
+    });
+    it('should throw an error when drawing out of bounds', () => {
+      const pixel: Pixel = { x: 50, y: 35, color: `#${'0000FF'}` };
+      expect(() => game.draw([pixel])).toThrowError(INVALID_DRAW_MESSAGE);
+    });
+
+    it('should throw an error when erasing out of bounds', () => {
+      const pixel: Pixel = { x: 50, y: 35, color: `#${'0000FF'}` };
+      expect(() => game.erase([pixel])).toThrowError(INVALID_DRAW_MESSAGE);
     });
   });
 });
