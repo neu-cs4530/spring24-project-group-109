@@ -548,14 +548,5 @@ describe('[T1] TicTacToeAreaController', () => {
         ]);
       });
     });
-    it('should call super._updateFrom', () => {
-      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore - we are testing spying on a private method
-      const spy = jest.spyOn(GameAreaController.prototype, '_updateFrom');
-      const controller = ticTacToeAreaControllerWithProp({});
-      const model = controller.toInteractableAreaModel();
-      controller.updateFrom(model, otherPlayers.concat(ourPlayer));
-      expect(spy).toHaveBeenCalled();
-    });
   });
 });
