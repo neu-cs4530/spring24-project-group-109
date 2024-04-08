@@ -21,7 +21,7 @@ import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
 const ROUND_TIME = 60; // seconds
-const MAX_ROUNDS = 4;
+const MAX_ROUNDS = 3;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
 
@@ -42,7 +42,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
       timer: ROUND_TIME, // seconds
-      round: 1,
+      round: 0,
       status: 'WAITING_FOR_PLAYERS',
       board: undefined,
       guess: undefined,
@@ -292,7 +292,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamA: { ...this.state.teamA, score: 0 },
       teamB: { ...this.state.teamB, score: 0 },
       timer: ROUND_TIME, // seconds
-      round: 1,
+      round: 0,
       status: 'IN_PROGRESS',
       difficulty,
       word: this._chooseWord(),
@@ -326,6 +326,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       };
     }
 
+    // if a player from one team leaves, the other team automatically wins
     if (teamAPlayers.length === 2 && teamBPlayers.length === 2) {
       if (teamAPlayers.includes(player.id)) {
         this.state = {

@@ -1,6 +1,6 @@
 export {};
 /**
- * Testing join game:
+ * Joining the game:
  *
  * - From the coveyTown, click the space bar when you get near the Pictionary game tile
  * - To join the game, click the 'Join Game' button
@@ -33,5 +33,11 @@ export {};
  * - When the timer runs out, the drawer will no longer be able to draw and the guesser will no longer be able to guess.
  * - The round will switch and increment up by 1.
  * - The game will display which team's turn it is to be drawing and guessing. This will switch and update as the rounds go on.
+ * - The game has a total of 4 rounds.
+ * - There are no invalid guesses. The only constraint is that the guesses cannot have a space. If a guess is attempted including a space, it will not show up in the textbox.
  *
+ *
+ * Ending the game
+ * - The game will end after 4 rounds.
+ * -If a team has a score greater than the other team, that team is declared the winner.
  */
