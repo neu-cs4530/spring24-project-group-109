@@ -154,6 +154,63 @@ export default function PictionaryArea({
       Join New Game
     </Button>
   );
+
+  const leaveGameButton = (
+    <Button
+      type='button'
+      onClick={async () => {
+        setLeavingGame(true);
+        await pictionaryAreaController.leaveGame();
+        setLeavingGame(false);
+      }}
+      isLoading={leavingGame}
+      disabled={leavingGame}>
+      Leave Game
+    </Button>
+  );
+
+  const easyGameButton = (
+    <Button
+      type='button'
+      onClick={async () => {
+        setStartingGame(true);
+        await pictionaryAreaController.startGame('Easy');
+        setStartingGame(false);
+      }}
+      isLoading={startingGame}
+      disabled={startingGame}>
+      Easy Game
+    </Button>
+  );
+
+  const mediumGameButton = (
+    <Button
+      type='button'
+      onClick={async () => {
+        setStartingGame(true);
+        await pictionaryAreaController.startGame('Medium');
+        setStartingGame(false);
+      }}
+      isLoading={startingGame}
+      disabled={startingGame}>
+      Medium Game
+    </Button>
+  );
+
+  const hardGameButton = (
+    <Button
+      type='button'
+      onClick={async () => {
+        setStartingGame(true);
+        await pictionaryAreaController.startGame('Hard');
+        setStartingGame(false);
+      }}
+      isLoading={startingGame}
+      disabled={startingGame}>
+      Hard Game
+    </Button>
+  );
+
   const gameStatusTextPlayers = (
     <>
       Game is{' '}
@@ -201,57 +258,12 @@ export default function PictionaryArea({
           {gameStatusTextPlayers}
           <br />
           <Flex flexDirection='row'>
-            <Flex flexDirection='row'>
-              <Button
-                type='button'
-                onClick={async () => {
-                  setStartingGame(true);
-                  await pictionaryAreaController.startGame('Easy');
-                  setStartingGame(false);
-                }}
-                isLoading={startingGame}
-                disabled={startingGame}>
-                Easy Game
-              </Button>
-            </Flex>
+            <Flex flexDirection='row'>{easyGameButton}</Flex>
             <Flex flexDirection='column'>
-              <Button
-                type='button'
-                onClick={async () => {
-                  setStartingGame(true);
-                  await pictionaryAreaController.startGame('Medium');
-                  setStartingGame(false);
-                }}
-                isLoading={startingGame}
-                disabled={startingGame}>
-                Medium Game
-              </Button>{' '}
-              <br />
-              <Button
-                type='button'
-                onClick={async () => {
-                  setLeavingGame(true);
-                  await pictionaryAreaController.leaveGame();
-                  setLeavingGame(false);
-                }}
-                isLoading={leavingGame}
-                disabled={leavingGame}>
-                Leave Game
-              </Button>
+              {mediumGameButton} <br />
+              {leaveGameButton}
             </Flex>
-            <Flex flexDirection='column'>
-              <Button
-                type='button'
-                onClick={async () => {
-                  setStartingGame(true);
-                  await pictionaryAreaController.startGame('Hard');
-                  setStartingGame(false);
-                }}
-                isLoading={startingGame}
-                disabled={startingGame}>
-                Hard Game
-              </Button>
-            </Flex>
+            <Flex flexDirection='column'>{hardGameButton}</Flex>
           </Flex>
         </Flex>
       ) : (
@@ -344,17 +356,7 @@ export default function PictionaryArea({
               )}
               <Flex flexDirection='column'>
                 <br />
-                <Button
-                  type='button'
-                  onClick={async () => {
-                    setLeavingGame(true);
-                    await pictionaryAreaController.leaveGame();
-                    setLeavingGame(false);
-                  }}
-                  isLoading={leavingGame}
-                  disabled={leavingGame}>
-                  Leave Game
-                </Button>
+                {leaveGameButton}
               </Flex>
             </Container>
           </Flex>

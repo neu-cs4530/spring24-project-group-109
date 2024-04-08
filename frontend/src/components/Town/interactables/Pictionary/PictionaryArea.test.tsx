@@ -4,14 +4,14 @@ export {};
  *
  * - From the coveyTown, click the space bar when you get near the Pictionary game tile
  * - To join the game, click the 'Join Game' button
- * - If you have already joined the game and your player ID shows up in the game and you are assigned to a team,
- * if you try to click the 'Join Game' button again, it will say you are already in the game
+ * - If you have already joined the game and your player ID shows up in the game and you are assigned to a team, if you try to click the 'Join Game' button again, it will say you are already in the game
  * - If you are the first player to join the game, you will be assigned to team A
  * - If you are the second player to join the game, you will be assigned to team A
  * - If you are the third player to join the game, you will be assigned to team B
  * - If you are the fourth player to join the game, you will be assigned to team B
- * Once all members have joined the game, the game will go a screen where a player has to pick the level of the game difficulty to play
- * Once one of the players clicks the difficulty level, the game will start
+ * - Once all members have joined the game, the game will go a screen where a player has to pick the level of the game difficulty to play
+ * - Once one of the players clicks the difficulty level, the game will start
+ * - A player is not able to leave the game at this stage. They must first join the game in order to leave.
  *
  *
  * Drawing on the whiteboard:
@@ -39,5 +39,12 @@ export {};
  *
  * Ending the game
  * - The game will end after 4 rounds.
- * -If a team has a score greater than the other team, that team is declared the winner.
+ * - If a team has a score greater than the other team, that team is declared the winner.
+ * - If both teams have the same score, the game will end in a tie.
+ * - If a player from Team A leaves the game, the game will end and team B will be declared the winner.
+ * - If a player from Team B leaves the game, the game will end and team A will be declared the winner.
+ * - After the end of the game or if a player leaves the game, they will have the option to rejoin the game if they would like to replay.
+ * It will prompt them to click the 'Join Game' button and once 4 players have joined, the they will be prompted to pick a game difficulty to start the game.
+ * From here, the game restarts as normal.
+ * - The player is allowed to leave at any point except for when players are joining. A player must first join a game in order to leave.
  */

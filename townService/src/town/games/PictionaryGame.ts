@@ -248,12 +248,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (teamAPlayers.includes(player.id) || teamBPlayers.includes(player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (teamAPlayers.length < 2) {
+    if (teamAPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamA: { ...teamA, players: [...teamAPlayers, player.id] },
       };
-    } else if (teamBPlayers.length < 2) {
+    } else if (teamBPlayers.length < 1) {
       this.state = {
         ...this.state,
         teamB: { ...teamB, players: [...teamBPlayers, player.id] },
@@ -261,7 +261,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
+    if (this.state.teamA.players.length === 1 && this.state.teamB.players.length === 1) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',
