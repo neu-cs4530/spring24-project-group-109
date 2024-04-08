@@ -70,23 +70,28 @@ export default function Leaderboard({ results }: { results: GameResult[] }): JSX
   const rows = Object.keys(winsLossesTiesByPlayer).map(player => winsLossesTiesByPlayer[player]);
   rows.sort((a, b) => b.wins - a.wins);
   return (
-    <Table size="sm"> {/* You can adjust the size of the table */}
+    <Table size='sm'>
+      {' '}
+      {/* You can adjust the size of the table */}
       <Thead>
         <Tr>
-          <Th fontSize="sm">Player</Th> {/* Adjust the font size here */}
-          <Th fontSize="sm">Wins</Th>
-          <Th fontSize="sm">Losses</Th>
-          <Th fontSize="sm">Ties</Th>
+          <Th fontSize='sm'>Player</Th> {/* Adjust the font size here */}
+          <Th fontSize='sm'>Wins</Th>
+          <Th fontSize='sm'>Losses</Th>
+          <Th fontSize='sm'>Ties</Th>
         </Tr>
       </Thead>
       <Tbody>
         {rows.map(record => {
           return (
             <Tr key={record.player}>
-              <Td fontSize="sm" isTruncated maxWidth="150px">{record.player}</Td> {/* Example of font size and max width with text truncation */}
-              <Td fontSize="sm">{record.wins}</Td>
-              <Td fontSize="sm">{record.losses}</Td>
-              <Td fontSize="sm">{record.ties}</Td>
+              <Td fontSize='sm' isTruncated maxWidth='150px'>
+                {record.player}
+              </Td>{' '}
+              {/* Example of font size and max width with text truncation */}
+              <Td fontSize='sm'>{record.wins}</Td>
+              <Td fontSize='sm'>{record.losses}</Td>
+              <Td fontSize='sm'>{record.ties}</Td>
             </Tr>
           );
         })}
