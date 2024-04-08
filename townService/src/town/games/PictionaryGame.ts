@@ -20,7 +20,7 @@ import {
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
-const ROUND_TIME = 60; // seconds
+const ROUND_TIME = 120; // seconds
 const MAX_ROUNDS = 3;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
@@ -248,12 +248,12 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     if (teamAPlayers.includes(player.id) || teamBPlayers.includes(player.id)) {
       throw new InvalidParametersError(PLAYER_ALREADY_IN_GAME_MESSAGE);
     }
-    if (teamAPlayers.length < 1) {
+    if (teamAPlayers.length < 2) {
       this.state = {
         ...this.state,
         teamA: { ...teamA, players: [...teamAPlayers, player.id] },
       };
-    } else if (teamBPlayers.length < 1) {
+    } else if (teamBPlayers.length < 2) {
       this.state = {
         ...this.state,
         teamB: { ...teamB, players: [...teamBPlayers, player.id] },
@@ -261,7 +261,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     } else {
       throw new InvalidParametersError(GAME_FULL_MESSAGE);
     }
-    if (this.state.teamA.players.length === 1 && this.state.teamB.players.length === 1) {
+    if (this.state.teamA.players.length === 2 && this.state.teamB.players.length === 2) {
       this.state = {
         ...this.state,
         status: 'WAITING_TO_START',
@@ -323,7 +323,18 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       this.state = {
         ...this.state,
         status: 'WAITING_FOR_PLAYERS',
+        drawer: undefined,
+        guesser: undefined,
+        word: undefined,
+        difficulty: 'No difficulty',
+        usedWords: [],
+        timer: ROUND_TIME,
+        round: 0,
+        board: undefined,
+        guess: undefined,
       };
+      this.reset();
+      this.state.timer = 120;
     }
 
     // if a player from one team leaves, the other team automatically wins
