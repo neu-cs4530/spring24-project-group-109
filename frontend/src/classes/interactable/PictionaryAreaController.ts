@@ -221,7 +221,7 @@ export default class PictionaryAreaController extends GameAreaController<
     if (!this._model.game) {
       return 'WAITING_FOR_PLAYERS';
     }
-    return this._model.game?.state.status ?? 'WAITING_TO_START';
+    return status ?? 'WAITING_TO_START';
   }
 
   /**
@@ -262,18 +262,10 @@ export default class PictionaryAreaController extends GameAreaController<
     if (newModel) {
       // if board has changed (ex. new drawing)
       if (oldModel.game?.state.board !== newModel.game?.state.board) {
-        //console.log('board changed');
         if (this._board) {
           this._board = newModel.game?.state.board ?? [];
         }
         this.emit('boardChanged', this.board);
-        for (const pixel of this._board) {
-          for (const eachPixel of pixel) {
-            if (eachPixel !== '#FFFFFF') {
-              //console.log(`Drawing at color: ${eachPixel}`);
-            }
-          }
-        }
       }
       // drawer has changed
       // is basically also checking isOurTurn
