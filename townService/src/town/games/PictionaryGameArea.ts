@@ -97,9 +97,9 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
+      console.log('game.id:', game?.id, 'command.gameID:', command.gameID);
       if (!game) {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
@@ -125,11 +125,15 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       game.tickDown();
+      this._emitAreaChanged();
     }
     if (command.type === 'PictionaryStartGame') {
       const game = this._game;
       if (!game) {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+      }
+      if (game.id !== command.gameID) {
+        throw new InvalidParametersError(GAME_ID_MISSMATCH_MESSAGE);
       }
       game.startGame(command.difficulty);
       this._stateUpdated(game.toModel());
