@@ -22,6 +22,7 @@ import Game from './Game';
 import PictionaryGame from './PictionaryGame';
 import { EASY_WORDS } from './PictionaryDictionary';
 
+const ROUND_TIME = 90;
 class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordList: string[];
 
@@ -32,6 +33,7 @@ class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
       round: 0,
+      timer: ROUND_TIME,
       status: 'WAITING_TO_START',
       difficulty: 'No difficulty',
       board: undefined,

@@ -71,7 +71,7 @@ export default function PictionaryArea({
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  const [timer, setTimer] = useState<number>(roundTime);
+  const [timer, setTimer] = useState(pictionaryAreaController.getTimer());
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
   const [focus, setFocus] = useState(false);
@@ -84,11 +84,10 @@ export default function PictionaryArea({
   //for updating the timer every second of the game
   useEffect(() => {
     const interval = setInterval(() => {
-      if (timer > 0) {
-        setTimer(timer - 1);
-      } else if (timer <= 0) {
-        pictionaryAreaController.nextRound();
-        setTimer(roundTime);
+      if (gameStatus === 'IN_PROGRESS') {
+        pictionaryAreaController.tickDown();
+        console.log(pictionaryAreaController.getTimer());
+        setTimer(pictionaryAreaController.getTimer());
       }
     }, 1000);
     return () => clearInterval(interval);

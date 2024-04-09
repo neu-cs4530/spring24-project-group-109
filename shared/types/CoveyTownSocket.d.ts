@@ -188,6 +188,7 @@ export interface PictionaryGameState extends WinnableGameState {
   teamB: PictionaryTeam;
   usedWords: string[];
   round: number;
+  timer: number;
   // board: WhiteBoardArea;
   guess?: string;
   board:  Color[][] | undefined;
@@ -270,7 +271,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | NextRoundCommand | ResetCommand | PictionaryStartGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | NextRoundCommand | TickDownCommand | ResetCommand | PictionaryStartGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -281,6 +282,10 @@ export interface JoinGameCommand {
 
 export interface NextRoundCommand {
   type: 'NextRound';
+}
+
+export interface TickDownCommand {
+  type: 'TickDown';
 }
 export interface LeaveGameCommand {
   type: 'LeaveGame';

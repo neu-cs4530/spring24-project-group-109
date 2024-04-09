@@ -23,6 +23,7 @@ import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 const MAX_ROUNDS = 4;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
+const ROUND_TIME = 90;
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
@@ -41,6 +42,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
       round: 1,
+      timer: ROUND_TIME,
       status: 'WAITING_FOR_PLAYERS',
       // board: new WhiteBoardArea(),
       board: undefined,
@@ -171,8 +173,21 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
         board: this._getBoard(),
         guess: undefined,
         round: this.state.round + 1,
+        timer: ROUND_TIME,
       };
       this._assignNewRoles();
+    }
+  }
+
+  public tickDown(): void {
+    console.log('reached tickdown in server');
+    if (this.state.timer === 0) {
+      this.nextRound();
+    } else if (this.state.timer > 0) {
+      this.state = {
+        ...this.state,
+        timer: this.state.timer - 1,
+      };
     }
   }
 
