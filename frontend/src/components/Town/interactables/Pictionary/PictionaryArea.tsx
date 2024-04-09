@@ -99,7 +99,7 @@ export default function PictionaryArea({
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
       setWord(pictionaryAreaController.getWord());
-      setGuess(pictionaryAreaController.getGuess());
+      // setGuess(pictionaryAreaController.getGuess());
       setDrawer(pictionaryAreaController.getDrawer());
       setGuesser(pictionaryAreaController.getGuesser());
       setRound(pictionaryAreaController.getRound());
