@@ -18,6 +18,7 @@
     "@types/enzyme": "^3.10.12",
     "@types/fscreen": "^1.0.1",
     "@types/jest": "^28.1.5",
+    "@types/node": "^18.0.3",
     "@types/lodash.throttle": "^4.1.7",
     "@types/react": "^17.0.60",
     "@types/react-dom": "^17.0.20",
@@ -51,7 +52,7 @@
     "twilio": "^3.84.1",
     "twilio-video": "^2.27.0",
     "typed-emitter": "^2.1.0",
-    "typescript": "^5.4.4",
+    "typescript": "^4.9.5",
     "use-react-screenshot": "3.0.0"
   },
   "engines": {
@@ -97,8 +98,7 @@
     "@types/assert": "^1.5.10",
     "@types/events": "^3.0.3",
     "@types/linkify-it": "^3.0.2",
-    "@types/node": "^20.11.30",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.6",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
