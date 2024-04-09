@@ -168,6 +168,7 @@ export type PictionaryWordDifficulty = 'Easy' | 'Medium' | 'Hard' | 'No difficul
 
 export type PictionaryTeamLetter = 'A' | 'B';
 
+
 /**
  * Type for a move in Pictionary
  */
@@ -186,7 +187,6 @@ export interface PictionaryGameState extends WinnableGameState {
   teamA: PictionaryTeam;
   teamB: PictionaryTeam;
   usedWords: string[];
-  timer: number;
   round: number;
   // board: WhiteBoardArea;
   guess?: string;
@@ -270,7 +270,7 @@ interface InteractableCommandBase {
   type: string;
 }
 
-export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | TickDownCommand | ResetCommand | PictionaryStartGameCommand;
+export type InteractableCommand =  ViewingAreaUpdateCommand | JoinGameCommand | GameMoveCommand<TicTacToeMove> | GameMoveCommand<ConnectFourMove> | GameMoveCommand<PictionaryMove> | StartGameCommand | LeaveGameCommand | DrawCommand | EraseCommand | NextRoundCommand | ResetCommand | PictionaryStartGameCommand;
 export interface ViewingAreaUpdateCommand  {
   type: 'ViewingAreaUpdate';
   update: ViewingArea;
@@ -279,8 +279,8 @@ export interface JoinGameCommand {
   type: 'JoinGame';
 }
 
-export interface TickDownCommand {
-  type: 'TickDown';
+export interface NextRoundCommand {
+  type: 'NextRound';
 }
 export interface LeaveGameCommand {
   type: 'LeaveGame';

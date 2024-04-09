@@ -31,7 +31,6 @@ class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
-      timer: 0,
       round: 0,
       status: 'WAITING_TO_START',
       difficulty: 'No difficulty',
@@ -52,7 +51,7 @@ class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
 
   public reset(): void {}
 
-  public tickDown(): void {}
+  public nextRound(): void {}
 
   public startGame(difficulty: PictionaryWordDifficulty): void {}
 }

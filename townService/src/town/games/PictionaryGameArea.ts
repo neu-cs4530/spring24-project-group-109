@@ -119,12 +119,12 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         return undefined as InteractableCommandReturnType<CommandType>;
       }
     }
-    if (command.type === 'TickDown') {
+    if (command.type === 'NextRound') {
       const game = this._game;
       if (!game) {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
-      game.tickDown();
+      game.nextRound();
     }
     if (command.type === 'PictionaryStartGame') {
       const game = this._game;

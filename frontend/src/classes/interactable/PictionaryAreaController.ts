@@ -113,12 +113,12 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._model.game?.state.usedWords ?? [];
   }
 
-  /**
-   * Returns the current timer value
-   */
-  public getTimer(): number {
-    return this._model.game?.state.timer ?? 0;
-  }
+  // /**
+  //  * Returns the current timer value
+  //  */
+  // public getTimer(): number {
+  //   return this._model.game?.state.timer;
+  // }
 
   /**
    * Returns the current round number
@@ -238,9 +238,9 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Sends a request to the server to tick down the timer
    */
-  public async tickDown() {
+  public async nextRound() {
     await this._sendInteractableCommandHelper({
-      type: 'TickDown',
+      type: 'NextRound',
     });
   }
 
@@ -293,10 +293,10 @@ export default class PictionaryAreaController extends GameAreaController<
       if (oldModel.game?.state.usedWords !== newModel.game?.state.usedWords) {
         this.emit('usedWordsChanged', this.getUsedWords());
       }
-      // timer has changed
-      if (oldModel.game?.state.timer !== newModel.game?.state.timer) {
-        this.emit('timerChanged', this.getTimer());
-      }
+      // // timer has changed
+      // if (oldModel.game?.state.timer !== newModel.game?.state.timer) {
+      //   this.emit('timerChanged', this.getTimer());
+      // }
       // round has changed
       if (oldModel.game?.state.round !== newModel.game?.state.round) {
         this.emit('roundChanged', this.getRound());
