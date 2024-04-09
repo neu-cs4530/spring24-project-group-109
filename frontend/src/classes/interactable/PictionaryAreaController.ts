@@ -4,6 +4,7 @@ import {
   GameStatus,
   InteractableCommand,
   PictionaryGameState,
+  PictionaryTeam,
   PictionaryWordDifficulty,
   Pixel,
 } from '../../types/CoveyTownSocket';
@@ -94,7 +95,7 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Returns the player who has won the game
    */
-  get winner(): string | undefined {
+  get winner(): string | PictionaryTeam | undefined {
     return this._model.game?.state.winner ?? ' ';
   }
 

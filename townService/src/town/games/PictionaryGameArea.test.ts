@@ -8,7 +8,6 @@ import {
 } from '../../lib/InvalidParametersError';
 import Player from '../../lib/Player';
 import {
-  GameInstanceID,
   GameMove,
   PictionaryGameState,
   PictionaryMove,
@@ -24,6 +23,7 @@ import { EASY_WORDS } from './PictionaryDictionary';
 
 class TestingGame extends Game<PictionaryGameState, PictionaryMove> {
   private _wordList: string[];
+
   public constructor() {
     super({
       word: 'test',
@@ -63,13 +63,15 @@ describe('PictionaryGameArea', () => {
   let player3: Player;
   let player4: Player;
   let interactableUpdateSpy: jest.SpyInstance;
-  const gameConstructorSpy = jest.spyOn(PictionaryGameModule, 'default');
   let game: TestingGame;
 
   beforeEach(() => {
+    const gameConstructorSpy = jest.spyOn(PictionaryGameModule, 'default');
     gameConstructorSpy.mockClear();
     game = new TestingGame();
-    gameConstructorSpy.mockReturnValue(game as unknown as PictionaryGame);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore (Testing without using the real game class)
+    gameConstructorSpy.mockReturnValue(game);
 
     player1 = createPlayerForTesting();
     player2 = createPlayerForTesting();
@@ -82,7 +84,17 @@ describe('PictionaryGameArea', () => {
       mock<TownEmitter>(),
     );
 
-    interactableUpdateSpy = jest.spyOn(gameArea as any, '_emitAreaChanged');
+    gameArea.add(player1);
+    game.join(player1);
+    gameArea.add(player2);
+    game.join(player2);
+    gameArea.add(player3);
+    game.join(player3);
+    gameArea.add(player4);
+    game.join(player4);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore (Test requires access to protected method)
+    interactableUpdateSpy = jest.spyOn(gameArea, '_emitAreaChanged');
   });
 
   describe('handleCommand', () => {
@@ -93,6 +105,32 @@ describe('PictionaryGameArea', () => {
         gameArea.handleCommand({ type: 'JoinGame' }, player2);
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(2); // Adjusted to 2 calls
       });
+    });
+  });
+
+  describe('handleCommand for draw', () => {
+    test('command should called', () => {
+      const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+      gameArea.handleCommand({ type: 'DrawCommand', drawing: [pixel] }, player1);
+      interactableUpdateSpy.mockClear();
+      expect(interactableUpdateSpy).toHaveBeenCalled();
+    });
+  });
+  describe('handleCommand for erase', () => {
+    test('command should called', () => {
+      const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+      interactableUpdateSpy.mockClear();
+      game.state.drawer = player1.id;
+      gameArea.handleCommand({ type: 'EraseCommand', drawing: [pixel] }, player1);
+      expect(interactableUpdateSpy).toHaveBeenCalled();
+    });
+  });
+  describe('handleCommand for reset', () => {
+    test('command should called', () => {
+      const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+      interactableUpdateSpy.mockClear();
+      gameArea.handleCommand({ type: 'ResetCommand', drawing: [pixel] }, player1);
+      expect(interactableUpdateSpy).toHaveBeenCalled();
     });
   });
 });
