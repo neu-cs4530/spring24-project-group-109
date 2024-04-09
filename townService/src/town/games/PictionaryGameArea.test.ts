@@ -106,14 +106,31 @@ describe('PictionaryGameArea', () => {
         expect(interactableUpdateSpy).toHaveBeenCalledTimes(2); // Adjusted to 2 calls
       });
     });
+    describe('DrawGame command', () => {
+      it('should add the player to the existing game if already in progress', () => {
+        const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
+        game.state.drawer = player1.id;
+        console.log(game.state.drawer);
+        console.log(player1.id);
+        gameArea.handleCommand({ type: 'DrawCommand', drawing: [pixel] }, player1);
+        // interactableUpdateSpy.mockClear();
+        interactableUpdateSpy.mockClear();
+        const drawCommand = jest.spyOn(game, 'draw');
+        expect(interactableUpdateSpy).toHaveBeenCalled();
+        // gameArea.handleCommand({ type: 'JoinGame' }, player2);
+        // expect(interactableUpdateSpy).toHaveBeenCalledTimes(2); // Adjusted to 2 calls
+      });
+    });
   });
 
   describe('handleCommand for draw', () => {
     test('command should called', () => {
       const pixel: Pixel = { x: 0, y: 0, color: `#${'0000FF'}` };
       gameArea.handleCommand({ type: 'DrawCommand', drawing: [pixel] }, player1);
-      interactableUpdateSpy.mockClear();
-      expect(interactableUpdateSpy).toHaveBeenCalled();
+      // interactableUpdateSpy.mockClear();
+      game.state.drawer = player1.id;
+      const drawCommand = jest.spyOn(game, 'draw');
+      expect(drawCommand).toHaveBeenCalled();
     });
   });
   describe('handleCommand for erase', () => {
