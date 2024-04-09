@@ -20,10 +20,10 @@ import {
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
-const ROUND_TIME = 60; // seconds
 const MAX_ROUNDS = 4;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
+const ROUND_TIME = 90;
 
 /**
  * A Pictionary game is a Game that implements the rules of team Pictionary.
@@ -41,8 +41,8 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       teamA: { letter: 'A', players: [], score: 0 },
       teamB: { letter: 'B', players: [], score: 0 },
       usedWords: [],
-      timer: ROUND_TIME, // seconds
       round: 1,
+      timer: ROUND_TIME,
       status: 'WAITING_FOR_PLAYERS',
       // board: new WhiteBoardArea(),
       board: undefined,
@@ -122,15 +122,16 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _assignNewRoles(): void {
-    const team = this.state.round % 2 === 0 ? this.state.teamA : this.state.teamB;
-    if (this.state.round <= 1) {
+    const team = this.state.round % 2 === 1 ? this.state.teamA : this.state.teamB;
+    const half = Math.floor(MAX_ROUNDS / 2);
+    if (this.state.round <= half) {
       this.state = {
         ...this.state,
         drawer: team.players[0],
         guesser: team.players[1],
       };
     }
-    if (this.state.round > 1) {
+    if (this.state.round > half) {
       this.state = {
         ...this.state,
         drawer: team.players[1],
@@ -139,35 +140,54 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     }
   }
 
+  private _winner(): void {
+    let winner = this.state.teamA.score > this.state.teamB.score ? 'A' : 'B';
+    if (this.state.teamA.score === this.state.teamB.score) {
+      winner = ' ';
+    }
+    this.state = {
+      ...this.state,
+      winner,
+    };
+  }
+
   /**
-   * Updates the round clock to count done. Meant to be called once a second.
-   * @throws InvalidParametersError if the game is not full (GAME_NOT_STARTABLE_MESSAGE)
+   * Updates the round to the next round.
+   * @throws InvalidParametersError if the game is not in progress (GAME_NOT_IN_PROGRESS_MESSAGE)
    */
-  public tickDown(): void {
+  public nextRound(): void {
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
     if (this.state.round === MAX_ROUNDS + 1) {
-      if (this.state.teamA.score > this.state.teamB.score) {
-        this.state.winner = 'A';
-      } else if (this.state.teamA.score < this.state.teamB.score) {
-        this.state.winner = 'B';
-      } else {
-        this.state.winner = ' ';
-      }
       this.state = {
         ...this.state,
         status: 'OVER',
+        guess: undefined,
       };
-      this.reset();
-    } else if (this.state.status === 'IN_PROGRESS') {
-      if (this.state.timer > 0) {
-        this.state = { ...this.state, timer: this.state.timer - 1 };
-      } else if (this.state.timer === 0) {
-        this.state = { ...this.state, timer: ROUND_TIME, round: this.state.round + 1 };
-        this._assignNewRoles();
-        this.state.word = this._chooseWord();
-        this.reset();
-        this.state.guess = undefined;
-        // this.state.currentColor = '#000000';
-      }
+      this._winner();
+    } else {
+      this.state = {
+        ...this.state,
+        word: this._chooseWord(),
+        board: this._getBoard(),
+        guess: undefined,
+        round: this.state.round + 1,
+        timer: ROUND_TIME,
+      };
+      this._assignNewRoles();
+    }
+  }
+
+  public tickDown(): void {
+    console.log('reached tickdown in server');
+    if (this.state.timer === 0) {
+      this.nextRound();
+    } else if (this.state.timer > 0) {
+      this.state = {
+        ...this.state,
+        timer: this.state.timer - 1,
+      };
     }
   }
 
@@ -294,7 +314,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       ...this.state,
       teamA: { ...this.state.teamA, score: 0 },
       teamB: { ...this.state.teamB, score: 0 },
-      timer: ROUND_TIME, // seconds
       round: 1,
       status: 'IN_PROGRESS',
       difficulty,

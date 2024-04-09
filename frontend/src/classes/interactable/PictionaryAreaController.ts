@@ -124,7 +124,7 @@ export default class PictionaryAreaController extends GameAreaController<
    * Returns the current round number
    */
   public getRound(): number {
-    return this._model.game?.state.round ?? 0;
+    return this._model.game?.state.round ?? 1;
   }
 
   /**
@@ -232,6 +232,15 @@ export default class PictionaryAreaController extends GameAreaController<
     await this._sendInteractableCommandHelper({
       type: 'EraseCommand',
       drawing,
+    });
+  }
+
+  /**
+   * Sends a request to the server to start the next round
+   */
+  public async nextRound() {
+    await this._sendInteractableCommandHelper({
+      type: 'NextRound',
     });
   }
 
