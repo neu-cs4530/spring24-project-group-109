@@ -44,10 +44,8 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       timer: ROUND_TIME, // seconds
       round: 1,
       status: 'WAITING_FOR_PLAYERS',
-      // board: new WhiteBoardArea(),
       board: undefined,
       guess: undefined,
-      // currentColor: '#000000',
     });
     this._wordList = EASY_WORDS;
     this.state.board = this._getBoard();
@@ -97,7 +95,6 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
     drawing.forEach((pixel: Pixel) => {
       if (this.state.board) {
         this.state.board[pixel.x][pixel.y] = `#${'FFFFFF'}`;
-        // this.state.currentColor = `#${'FFFFFF'}`;
       }
     });
   }
