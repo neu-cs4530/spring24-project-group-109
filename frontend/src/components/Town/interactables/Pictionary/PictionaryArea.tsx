@@ -70,7 +70,6 @@ export default function PictionaryArea({
   const [startingGame, setStartingGame] = useState(false);
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
-  //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
   const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
