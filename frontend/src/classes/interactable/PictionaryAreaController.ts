@@ -15,9 +15,6 @@ import GameAreaController, {
   PLAYER_NOT_IN_GAME_ERROR,
 } from './GameAreaController';
 
-// const WHITEBOARD_HEIGHT = 30;
-// const WHITEBOARD_WIDTH = 30;
-
 /**
  * The type of the context that provides the Pictionary events
  */
