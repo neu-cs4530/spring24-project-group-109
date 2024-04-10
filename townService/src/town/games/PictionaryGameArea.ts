@@ -63,9 +63,9 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
             gameID,
             scores: {
               [`${teamAFirstPlayerName}, ${teamASecondPlayerName}`]:
-                updatedState.state.winner === teamA ? 1 : 0,
+                updatedState.state.winner === teamA.letter ? 1 : 0,
               [`${teamBFirstPlayerName}, ${teamBSecondPlayerName}`]:
-                updatedState.state.winner === teamB ? 1 : 0,
+                updatedState.state.winner === teamB.letter ? 1 : 0,
             },
           });
         }
@@ -125,7 +125,7 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
         throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
       }
       game.tickDown();
-      this._emitAreaChanged();
+      this._stateUpdated(game.toModel());
     }
     if (command.type === 'PictionaryStartGame') {
       const game = this._game;

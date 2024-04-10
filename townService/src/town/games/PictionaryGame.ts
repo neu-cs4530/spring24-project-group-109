@@ -20,7 +20,7 @@ import {
 import Game from './Game';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from './PictionaryDictionary';
 
-const ROUND_TIME = 60; // seconds
+const ROUND_TIME = 120; // seconds
 const MAX_ROUNDS = 4;
 const WHITEBOARD_HEIGHT = 35;
 const WHITEBOARD_WIDTH = 50;
@@ -103,7 +103,11 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * Reset the whiteboard to its initial blank state.
    */
   public reset(): void {
-    this.state.board = this._getBoard();
+    this.state = {
+      ...this.state,
+      board: this._getBoard(),
+    };
+    // this.state.board = this._getBoard();
   }
 
   private _getBoard(): Color[][] {
@@ -119,15 +123,16 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _assignNewRoles(): void {
-    const team = this.state.round % 2 === 0 ? this.state.teamA : this.state.teamB;
-    if (this.state.round <= 1) {
+    const team = this.state.round % 2 === 1 ? this.state.teamA : this.state.teamB;
+    const half = Math.floor(MAX_ROUNDS / 2);
+    if (this.state.round <= half) {
       this.state = {
         ...this.state,
         drawer: team.players[0],
         guesser: team.players[1],
       };
     }
-    if (this.state.round > 1) {
+    if (this.state.round > half) {
       this.state = {
         ...this.state,
         drawer: team.players[1],
@@ -141,16 +146,18 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
    * @throws InvalidParametersError if the game is not full (GAME_NOT_STARTABLE_MESSAGE)
    */
   public tickDown(): void {
+    let winningTeam;
     if (this.state.round === MAX_ROUNDS + 1) {
       if (this.state.teamA.score > this.state.teamB.score) {
-        this.state.winner = 'A';
+        winningTeam = 'A';
       } else if (this.state.teamA.score < this.state.teamB.score) {
-        this.state.winner = 'B';
+        winningTeam = 'B';
       } else {
-        this.state.winner = ' ';
+        winningTeam = ' ';
       }
       this.state = {
         ...this.state,
+        winner: winningTeam,
         status: 'OVER',
       };
       this.reset();
@@ -158,11 +165,15 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
       if (this.state.timer > 0) {
         this.state = { ...this.state, timer: this.state.timer - 1 };
       } else if (this.state.timer === 0) {
-        this.state = { ...this.state, timer: ROUND_TIME, round: this.state.round + 1 };
+        this.state = {
+          ...this.state,
+          timer: ROUND_TIME,
+          round: this.state.round + 1,
+          word: this._chooseWord(),
+          guess: undefined,
+        };
         this._assignNewRoles();
-        this.state.word = this._chooseWord();
         this.reset();
-        this.state.guess = undefined;
         // this.state.currentColor = '#000000';
       }
     }

@@ -41,11 +41,11 @@ export default function PictionaryBoard({
     setBoard(newBoard);
   };
   useEffect(() => {
-    console.log('board change 1');
+    //console.log('board change 1');
     pictionaryAreaController.addListener('boardChanged', handleBoardChanges);
-    console.log('handle');
+    //console.log('handle');
     return () => {
-      console.log('board change 2');
+      //console.log('board change 2');
       pictionaryAreaController.removeListener('boardChanged', handleBoardChanges);
     };
   }, [pictionaryAreaController]);

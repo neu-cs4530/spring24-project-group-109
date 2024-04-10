@@ -95,7 +95,7 @@ export default class PictionaryAreaController extends GameAreaController<
   /**
    * Returns the player who has won the game
    */
-  get winner(): string | PictionaryTeam | undefined {
+  get winner(): string | undefined | PictionaryTeam {
     return this._model.game?.state.winner ?? ' ';
   }
 
