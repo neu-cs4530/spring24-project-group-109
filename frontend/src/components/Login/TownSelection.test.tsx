@@ -245,7 +245,6 @@ describe('Town Selection', () => {
       rows = renderData.getAllByRole('row');
       for (let i = 1; i < rows.length; i += 1) {
         // off-by-one for the header row
-        // console.log(rows[i]);
         const existing = within(rows[i]).getByText(expectedTowns2[i - 1].friendlyName);
         expect(existing).toBeInTheDocument();
         for (let j = 0; j < expectedTowns2.length; j += 1) {

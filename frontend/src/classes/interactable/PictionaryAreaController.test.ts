@@ -2,19 +2,19 @@ import assert from 'assert';
 import { mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import {
-  GameArea,
+  Color,
   GameResult,
   GameStatus,
-  TicTacToeGameState,
-  TicTacToeGridPosition,
-  TicTacToeMove,
+  PictionaryTeam,
+  PictionaryWordDifficulty,
+  PlayerID,
 } from '../../types/CoveyTownSocket';
 import PlayerController from '../PlayerController';
 import TownController from '../TownController';
-import GameAreaController, { NO_GAME_IN_PROGRESS_ERROR } from './GameAreaController';
-import TicTacToeAreaController from './TicTacToeAreaController';
+import { NO_GAME_IN_PROGRESS_ERROR } from './GameAreaController';
+import PictionaryAreaController from './PictionaryAreaController';
 
-describe('[T1] TicTacToeAreaController', () => {
+describe('PictionaryAreaController', () => {
   const ourPlayer = new PlayerController(nanoid(), nanoid(), {
     x: 0,
     y: 0,
@@ -22,6 +22,8 @@ describe('[T1] TicTacToeAreaController', () => {
     rotation: 'front',
   });
   const otherPlayers = [
+    new PlayerController(nanoid(), nanoid(), { x: 0, y: 0, moving: false, rotation: 'front' }),
+    new PlayerController(nanoid(), nanoid(), { x: 0, y: 0, moving: false, rotation: 'front' }),
     new PlayerController(nanoid(), nanoid(), { x: 0, y: 0, moving: false, rotation: 'front' }),
     new PlayerController(nanoid(), nanoid(), { x: 0, y: 0, moving: false, rotation: 'front' }),
   ];
@@ -38,50 +40,58 @@ describe('[T1] TicTacToeAreaController', () => {
     assert(p);
     return p;
   });
-
-  function ticTacToeAreaControllerWithProp({
+  function pictionaryAreaControllerWithProps({
     _id,
     history,
-    x,
-    o,
-    undefinedGame,
     status,
-    moves,
-    winner,
+    gameInstanceID,
+    teamA,
+    teamB,
   }: {
     _id?: string;
     history?: GameResult[];
-    x?: string;
-    o?: string;
-    undefinedGame?: boolean;
     status?: GameStatus;
-    moves?: TicTacToeMove[];
-    winner?: string;
+    gameInstanceID?: string;
+    winner?: PlayerID;
+    drawer?: PlayerID;
+    guesser?: PlayerID;
+    word?: string;
+    difficulty: PictionaryWordDifficulty;
+    teamA: PictionaryTeam;
+    teamB: PictionaryTeam;
+    usedWords: string[];
+    timer: number;
+    round: number;
+    guess?: string;
+    board: Color[][];
   }) {
-    const id = _id || nanoid();
+    const id = _id || `INTERACTABLE-ID-${nanoid()}`;
+    const instanceID = gameInstanceID || `GAME-INSTANCE-ID-${nanoid()}`;
     const players = [];
-    if (x) players.push(x);
-    if (o) players.push(o);
-    const ret = new TicTacToeAreaController(
+    if (teamA) players.push(teamA.players[0], teamA.players[1]);
+    if (teamB) players.push(teamB.players[0], teamB.players[1]);
+    const ret = new PictionaryAreaController(
       id,
       {
         id,
         occupants: players,
         history: history || [],
-        type: 'TicTacToeArea',
-        game: undefinedGame
-          ? undefined
-          : {
-              id,
-              players: players,
-              state: {
-                status: status || 'IN_PROGRESS',
-                x: x,
-                o: o,
-                moves: moves || [],
-                winner: winner,
-              },
-            },
+        type: 'PictionaryArea',
+        game: undefined || {
+          id: instanceID,
+          players: players,
+          state: {
+            status: status || 'IN_PROGRESS',
+            word: '',
+            usedWords: [],
+            timer: 120,
+            round: 1,
+            difficulty: 'No difficulty',
+            teamA: { letter: 'A', players: [], score: 0 },
+            teamB: { letter: 'B', players: [], score: 0 },
+            board: [],
+          },
+        },
       },
       mockTownController,
     );
@@ -92,478 +102,533 @@ describe('[T1] TicTacToeAreaController', () => {
     }
     return ret;
   }
-  describe('[T1.1]', () => {
-    describe('isActive', () => {
-      it('should return true if the game is in progress and there is a player in the area', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-        });
-        expect(controller.isActive()).toBe(true);
-      });
-      it('should return false if the game is not in progress', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'OVER',
-        });
-        expect(controller.isActive()).toBe(false);
-      });
-    });
-    describe('isPlayer', () => {
-      it('should return true if the current player is a player in this game', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-        });
-        expect(controller.isPlayer).toBe(true);
-      });
-      it('should return false if the current player is not a player in this game', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: otherPlayers[0].id,
-          o: otherPlayers[1].id,
-        });
-        expect(controller.isPlayer).toBe(false);
-      });
-    });
-    describe('gamePiece', () => {
-      it('should return the game piece of the current player if the current player is a player in this game', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-        });
-        expect(controller.gamePiece).toBe('X');
+  // describe('Properties at the start of the game', () => {
+  //   describe('board', () => {
+  //     it('returns blank white board', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         board: [],
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //       });
+  //       //Expect correct number of rows
+  //       expect(controller.board.length).toBe(35);
+  //       for (let i = 0; i < 35; i++) {
+  //         //Expect correct number of columns
+  //         expect(controller.board[i].length).toBe(50);
+  //         for (let j = 0; j < 50; j++) {
+  //           //Expect each cell to be empty
+  //           expect(controller.board[i][j]).toBe(`#${'FFFFFF'}`);
+  //         }
+  //       }
+  //     });
+  //   });
+  //   describe('players', () => {
+  //     it('returns the 1st player of teamA if there is a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAPlayers()[0]).toBe(ourPlayer);
+  //     });
+  //     it('returns the 1st player of teamA if there is a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAPlayers()[0]).toBe(ourPlayer);
+  //     });
+  //     it('returns the 1st player of teamA if there is a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAPlayers()[0]).toBe(ourPlayer);
+  //     });
+  //     it('returns the 2nd player of teamA if there is a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAPlayers()[1]).toBe(otherPlayers[0].id);
+  //     });
+  //   });
 
-        //check O
-        const controller2 = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          o: ourPlayer.id,
+  //   describe('winner', () => {
+  //     it('returns the winner if there is a winner', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         winner: ourPlayer.id,
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.winner).toBe(ourPlayer);
+  //     });
+  //     it('returns undefined if there is no winner', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         winner: undefined,
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.winner).toBeUndefined();
+  //     });
+  //   });
+  //   describe('getTimer', () => {
+  //     it('returns the current time left from the game state', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTimer).toBe(120);
+  //     });
+  //   });
+  //   describe('getRound', () => {
+  //     it('returns the current round from the game state', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getRound).toBe(1);
+  //     });
+  //   });
+  //   describe('getDifficulty', () => {
+  //     it('returns the player selected difficulty', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'Easy',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getDifficulty).toBe('Easy');
+  //     });
+  //   });
+  //   describe('getGuess', () => {
+  //     it('returns the guess from the game state', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         guess: 'Test Guess',
+  //       });
+  //       expect(controller.getGuess).toBe('Test Guess');
+  //     });
+  //   });
+  //   describe('getWord', () => {
+  //     it('returns the Word to draw', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         word: 'Test Word',
+  //       });
+  //       expect(controller.getGuess).toBe('Test Word');
+  //     });
+  //   });
+  //   describe('isOurTurn', () => {
+  //     it('returns true if it is our turn', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         guesser: ourPlayer.id,
+  //       });
+  //       expect(controller.isOurTurn).toBe(true);
+  //     });
+  //     it('returns false if it is not our turn', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         guesser: undefined,
+  //       });
+  //       expect(controller.isOurTurn).toBe(false);
+  //     });
+  //   });
+  //   describe('isPlayer', () => {
+  //     it('returns true if we are a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         guesser: ourPlayer.id,
+  //       });
+  //       expect(controller.isPlayer).toBe(true);
+  //     });
+  //     it('returns false if we are not a player', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.isPlayer).toBe(false);
+  //     });
+  //   });
+  //   describe('getTeamAScore', () => {
+  //     it('returns a number if Team has a score', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAScore).toBe(1);
+  //     });
+  //     it('return 0 if teamA has no Points', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAScore).toBe(0);
+  //     });
+  //   });
+  //   describe('getTeamBScore', () => {
+  //     it('returns a number if Team has a score', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAScore).toBe(1);
+  //     });
+  //     it('return 0 if team has no Points', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAScore).toBe(0);
+  //     });
+  //   });
+  //   describe('getTeamAPlayer', () => {
+  //     it('returns the player in team 1', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         teamB: { letter: 'B', players: [], score: 0 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAPlayers).toBeDefined();
+  //     });
+  //   });
+  //   describe('getTeamBPlayers', () => {
+  //     it('returns the player in Team B', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamBPlayers).toBeDefined();
+  //     });
+  //     it('return 0 if team has no Points', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //       });
+  //       expect(controller.getTeamAScore).toBe(0);
+  //     });
+  //   });
+  //   describe('Drawing and Guessing', () => {
+  //     describe('getDrawer', () => {
+  //       it('returns the assigned drawer that is drawing', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [], score: 0 },
+  //           teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //           drawer: ourPlayer.id,
+  //         });
+  //         expect(controller.getDrawer()).toBe(ourPlayer);
+  //       });
+  //       it('return undefined if there is no drawer', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [], score: 0 },
+  //           teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //         });
+  //         expect(controller.getDrawer()).toBeUndefined();
+  //       });
+  //     });
+  //     describe('getGuesser', () => {
+  //       it('returns the assigned guesser that is guessing', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [], score: 0 },
+  //           teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //           guesser: ourPlayer.id,
+  //         });
+  //         expect(controller.getGuess()).toBe(ourPlayer);
+  //       });
+  //       it('return undefined if there is no drawer', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [], score: 0 },
+  //           teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //         });
+  //         expect(controller.getGuesser()).toBeUndefined();
+  //       });
+  //     });
+  //     describe('getTeam', () => {
+  //       it('returns the Team that drawing', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [], score: 0 },
+  //           teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //           guesser: ourPlayer.id,
+  //         });
+  //         expect(controller.getTeam()).toBe('B');
+  //       });
+  //       it('return undefined if there is no drawer', () => {
+  //         const controller = pictionaryAreaControllerWithProps({
+  //           difficulty: 'No difficulty',
+  //           teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //           teamB: { letter: 'B', players: [], score: 1 },
+  //           usedWords: [],
+  //           timer: 120,
+  //           round: 1,
+  //           board: [],
+  //           guesser: ourPlayer.id,
+  //         });
+  //         expect(controller.getTeam()).toBe('A');
+  //       });
+  //     });
+  //   });
+  //   describe('isActive', () => {
+  //     it('returns true if the game is not empty and it is not over', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         status: 'IN_PROGRESS',
+  //       });
+  //       expect(controller.isActive()).toBe(true);
+  //     });
+  //     it('returns false if the game is empty', () => {
+  //       const controller = pictionaryAreaControllerWithProps({
+  //         difficulty: 'No difficulty',
+  //         teamA: { letter: 'A', players: [], score: 0 },
+  //         teamB: { letter: 'B', players: [ourPlayer.id, otherPlayers[0].id], score: 1 },
+  //         usedWords: [],
+  //         timer: 120,
+  //         round: 1,
+  //         board: [],
+  //         status: 'OVER',
+  //       });
+  //       expect(controller.isActive()).toBe(false);
+  //     });
+  //   });
+  // });
+  // describe('startGame', () => {
+  //   it('sends a StartGame command to the server', async () => {
+  //     const controller = pictionaryAreaControllerWithProps({
+  //       difficulty: 'No difficulty',
+  //       teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //       teamB: { letter: 'B', players: [otherPlayers[1].id, otherPlayers[0].id], score: 0 },
+  //       usedWords: [],
+  //       timer: 120,
+  //       round: 1,
+  //       board: [],
+  //       status: 'WAITING_TO_START',
+  //     });
+  //     const instanceID = nanoid();
+  //     mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
+  //       return { gameID: instanceID };
+  //     });
+  //     await controller.joinGame();
+
+  //     mockTownController.sendInteractableCommand.mockClear();
+  //     mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {});
+  //     await controller.startGame('Easy');
+  //     expect(mockTownController.sendInteractableCommand).toHaveBeenCalledWith(controller.id, {
+  //       type: 'StartGame',
+  //       gameID: instanceID,
+  //     });
+  //   });
+  //   it('Does not catch any errors from the server', async () => {
+  //     const controller = pictionaryAreaControllerWithProps({
+  //       difficulty: 'No difficulty',
+  //       teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //       teamB: { letter: 'B', players: [otherPlayers[1].id, otherPlayers[0].id], score: 0 },
+  //       usedWords: [],
+  //       timer: 120,
+  //       round: 1,
+  //       board: [],
+  //       status: 'WAITING_TO_START',
+  //     });
+  //     const instanceID = nanoid();
+  //     mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
+  //       return { gameID: instanceID };
+  //     });
+  //     await controller.joinGame();
+
+  //     mockTownController.sendInteractableCommand.mockClear();
+  //     const uniqueError = `Test Error ${nanoid()}`;
+  //     mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
+  //       throw new Error(uniqueError);
+  //     });
+  //     await expect(() => controller.startGame('Easy')).rejects.toThrowError(uniqueError);
+  //     expect(mockTownController.sendInteractableCommand).toHaveBeenCalledWith(controller.id, {
+  //       type: 'StartGame',
+  //       gameID: instanceID,
+  //     });
+  //   });
+  //   it('throws an error if the game is not startable', async () => {
+  //     const controller = pictionaryAreaControllerWithProps({
+  //       difficulty: 'No difficulty',
+  //       teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+  //       teamB: { letter: 'B', players: [otherPlayers[1].id, otherPlayers[0].id], score: 0 },
+  //       usedWords: [],
+  //       timer: 120,
+  //       round: 1,
+  //       board: [],
+  //       status: 'IN_PROGRESS',
+  //     });
+  //     const instanceID = nanoid();
+  //     mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
+  //       return { gameID: instanceID };
+  //     });
+  //     await controller.joinGame();
+  //     mockTownController.sendInteractableCommand.mockClear();
+  //     await expect(controller.startGame('Easy')).rejects.toThrowError();
+  //     expect(mockTownController.sendInteractableCommand).not.toHaveBeenCalled();
+  //   });
+  // });
+  describe('makeMove', () => {
+    describe('With no game in progress', () => {
+      it('Throws an error if game status is not IN_PROGRESS', async () => {
+        const controller = pictionaryAreaControllerWithProps({
+          difficulty: 'No difficulty',
+          teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
+          teamB: { letter: 'B', players: [otherPlayers[1].id, otherPlayers[0].id], score: 0 },
+          usedWords: [],
+          timer: 120,
+          round: 1,
+          board: [],
+          status: 'WAITING_FOR_PLAYERS',
         });
-        expect(controller2.gamePiece).toBe('O');
-      });
-      it('should throw an error if the current player is not a player in this game', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: otherPlayers[0].id,
-          o: otherPlayers[1].id,
-        });
-        expect(() => controller.gamePiece).toThrowError();
-      });
-    });
-    describe('status', () => {
-      it('should return the status of the game', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-        });
-        expect(controller.status).toBe('IN_PROGRESS');
-      });
-      it('should return WAITING_TO_START if the game is not defined', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          undefinedGame: true,
-        });
-        expect(controller.status).toBe('WAITING_TO_START');
-      });
-    });
-    describe('whoseTurn', () => {
-      it('should return the player whose turn it is initially', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        expect(controller.whoseTurn).toBe(ourPlayer);
-      });
-      it('should return the player whose turn it is after a move', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-          moves: [
-            {
-              gamePiece: 'X',
-              row: 0,
-              col: 0,
-            },
-          ],
-        });
-        expect(controller.whoseTurn).toBe(otherPlayers[0]);
-      });
-      it('should return undefined if the game is not in progress', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'OVER',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        expect(controller.whoseTurn).toBe(undefined);
-      });
-    });
-    describe('isOurTurn', () => {
-      it('should return true if it is our turn', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        expect(controller.isOurTurn).toBe(true);
-      });
-      it('should return false if it is not our turn', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: otherPlayers[0].id,
-          o: ourPlayer.id,
-        });
-        expect(controller.isOurTurn).toBe(false);
-      });
-    });
-    describe('moveCount', () => {
-      it('should return the number of moves that have been made', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-          moves: [
-            {
-              gamePiece: 'X',
-              row: 0,
-              col: 0,
-            },
-          ],
-        });
-        expect(controller.moveCount).toBe(1);
-      });
-    });
-    describe('board', () => {
-      it('should return an empty board by default', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        expect(controller.board).toEqual([
-          [undefined, undefined, undefined],
-          [undefined, undefined, undefined],
-          [undefined, undefined, undefined],
-        ]);
-      });
-    });
-    describe('x', () => {
-      it('should return the x player if there is one', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        expect(controller.x).toBe(ourPlayer);
-      });
-      it('should return undefined if there is no x player and the game is waiting to start', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'WAITING_TO_START',
-        });
-        expect(controller.x).toBe(undefined);
-      });
-      it('should return undefined if there is no x player', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          o: otherPlayers[0].id,
-        });
-        expect(controller.x).toBe(undefined);
-      });
-    });
-    describe('o', () => {
-      it('should return the o player if there is one', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: otherPlayers[0].id,
-          o: ourPlayer.id,
-        });
-        expect(controller.o).toBe(ourPlayer);
-      });
-      it('should return undefined if there is no o player and the game is waiting to start', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'WAITING_TO_START',
-        });
-        expect(controller.o).toBe(undefined);
-      });
-      it('should return undefined if there is no o player', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: otherPlayers[0].id,
-        });
-        expect(controller.o).toBe(undefined);
-      });
-    });
-    describe('winner', () => {
-      it('should return the winner if there is one', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'OVER',
-          x: otherPlayers[0].id,
-          o: ourPlayer.id,
-          winner: ourPlayer.id,
-        });
-        expect(controller.winner).toBe(ourPlayer);
-      });
-      it('should return undefined if there is no winner', () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'OVER',
-          x: otherPlayers[0].id,
-          o: ourPlayer.id,
-        });
-        expect(controller.winner).toBe(undefined);
-      });
-    });
-    describe('makeMove', () => {
-      it('should throw an error if the game is not in progress', async () => {
-        const controller = ticTacToeAreaControllerWithProp({});
-        await expect(async () => controller.makeMove(0, 0)).rejects.toEqual(
-          new Error(NO_GAME_IN_PROGRESS_ERROR),
+        await expect(() => controller.makeMove('guess')).rejects.toThrowError(
+          NO_GAME_IN_PROGRESS_ERROR,
         );
       });
-      it('Should call townController.sendInteractableCommand', async () => {
-        const controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-        // Simulate joining the game for real
-        const instanceID = nanoid();
-        mockTownController.sendInteractableCommand.mockImplementationOnce(async () => {
-          return { gameID: instanceID };
-        });
-        await controller.joinGame();
-        mockTownController.sendInteractableCommand.mockReset();
-        await controller.makeMove(2, 1);
-        expect(mockTownController.sendInteractableCommand).toHaveBeenCalledWith(controller.id, {
-          type: 'GameMove',
-          gameID: instanceID,
-          move: {
-            row: 2,
-            col: 1,
-            gamePiece: 'X',
-          },
-        });
-      });
-    });
-  });
-  describe('[T1.2] _updateFrom', () => {
-    describe('if the game is in progress', () => {
-      let controller: TicTacToeAreaController;
-      beforeEach(() => {
-        controller = ticTacToeAreaControllerWithProp({
-          status: 'IN_PROGRESS',
-          x: ourPlayer.id,
-          o: otherPlayers[0].id,
-        });
-      });
-      it('should emit a boardChanged event with the new board', () => {
-        const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
-        assert(model.game);
-        const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMoves,
-            },
-          },
-        };
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-        const boardChangedCall = emitSpy.mock.calls.find(call => call[0] === 'boardChanged');
-        expect(boardChangedCall).toBeDefined();
-        if (boardChangedCall)
-          expect(boardChangedCall[1]).toEqual([
-            ['X', undefined, undefined],
-            [undefined, 'O', undefined],
-            [undefined, undefined, undefined],
-          ]);
-      });
-      it('should emit a turnChanged event with true if it is our turn', () => {
-        const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
-        assert(model.game);
-        const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: [newMoves[0]],
-            },
-          },
-        };
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-        const testModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMoves,
-            },
-          },
-        };
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(testModel, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).toBeDefined();
-        if (turnChangedCall) expect(turnChangedCall[1]).toEqual(true);
-      });
-      it('should emit a turnChanged event with false if it is not our turn', () => {
-        const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-        ];
-        expect(controller.isOurTurn).toBe(true);
-        assert(model.game);
-        const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMoves,
-            },
-          },
-        };
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).toBeDefined();
-        if (turnChangedCall) expect(turnChangedCall[1]).toEqual(false);
-      });
-      it('should not emit a turnChanged event if the turn has not changed', () => {
-        const model = controller.toInteractableAreaModel();
-        assert(model.game);
-        expect(controller.isOurTurn).toBe(true);
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(model, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'turnChanged');
-        expect(turnChangedCall).not.toBeDefined();
-      });
-      it('should not emit a boardChanged event if the board has not changed', () => {
-        const model = controller.toInteractableAreaModel();
-        assert(model.game);
-
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
-        const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMoves,
-            },
-          },
-        };
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-
-        const newMovesWithShuffle: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-        ];
-
-        const newModelWithSuffle: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMovesWithShuffle,
-            },
-          },
-        };
-        const emitSpy = jest.spyOn(controller, 'emit');
-        controller.updateFrom(newModelWithSuffle, otherPlayers.concat(ourPlayer));
-        const turnChangedCall = emitSpy.mock.calls.find(call => call[0] === 'boardChanged');
-        expect(turnChangedCall).not.toBeDefined();
-      });
-      it('should update the board returned by the board property', () => {
-        const model = controller.toInteractableAreaModel();
-        const newMoves: ReadonlyArray<TicTacToeMove> = [
-          {
-            gamePiece: 'X',
-            row: 0 as TicTacToeGridPosition,
-            col: 0 as TicTacToeGridPosition,
-          },
-          {
-            gamePiece: 'O',
-            row: 1 as TicTacToeGridPosition,
-            col: 1 as TicTacToeGridPosition,
-          },
-        ];
-        assert(model.game);
-        const newModel: GameArea<TicTacToeGameState> = {
-          ...model,
-          game: {
-            ...model.game,
-            state: {
-              ...model.game?.state,
-              moves: newMoves,
-            },
-          },
-        };
-        controller.updateFrom(newModel, otherPlayers.concat(ourPlayer));
-        expect(controller.board).toEqual([
-          ['X', undefined, undefined],
-          [undefined, 'O', undefined],
-          [undefined, undefined, undefined],
-        ]);
-      });
-    });
-    it('should call super._updateFrom', () => {
-      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore - we are testing spying on a private method
-      const spy = jest.spyOn(GameAreaController.prototype, '_updateFrom');
-      const controller = ticTacToeAreaControllerWithProp({});
-      const model = controller.toInteractableAreaModel();
-      controller.updateFrom(model, otherPlayers.concat(ourPlayer));
-      expect(spy).toHaveBeenCalled();
     });
   });
 });

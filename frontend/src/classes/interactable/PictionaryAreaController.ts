@@ -183,10 +183,6 @@ export default class PictionaryAreaController extends GameAreaController<
     return this._board;
   }
 
-  // public getColor(): Color {
-  //   return this._model.game?.state.currentColor ?? '#000000';
-  // }
-
   /**
    * Starts the game based on the difficulty that the player chooses
    * @param difficulty the game difficulty level
@@ -262,18 +258,10 @@ export default class PictionaryAreaController extends GameAreaController<
     if (newModel) {
       // if board has changed (ex. new drawing)
       if (oldModel.game?.state.board !== newModel.game?.state.board) {
-        //console.log('board changed');
         if (this._board) {
           this._board = newModel.game?.state.board ?? [];
         }
         this.emit('boardChanged', this.board);
-        for (const pixel of this._board) {
-          for (const eachPixel of pixel) {
-            if (eachPixel !== '#FFFFFF') {
-              //console.log(`Drawing at color: ${eachPixel}`);
-            }
-          }
-        }
       }
       // drawer has changed
       // is basically also checking isOurTurn
