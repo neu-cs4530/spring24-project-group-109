@@ -100,7 +100,6 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     command: CommandType,
     player: Player,
   ): InteractableCommandReturnType<CommandType> {
-    this._emitAreaChanged();
     if (command.type === 'GameMove') {
       const game = this._game;
       if (!game) {
