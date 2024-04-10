@@ -154,7 +154,7 @@ describe('PictionaryGame', () => {
         game.startGame('Easy');
         const move: GameMove<PictionaryMove> = {
           gameID: game.id,
-          playerID: player2.id,
+          playerID: player4.id,
           move: { guess: 'test' },
         };
         expect(() => game.applyMove(move)).toThrowError(MOVE_NOT_YOUR_TURN_MESSAGE);
@@ -267,8 +267,8 @@ describe('PictionaryGame', () => {
         game.state.guesser = player2.id;
         game.tickDown();
         expect(game.state.round).toEqual(2);
-        expect(game.state.drawer).toEqual(player2.id);
-        expect(game.state.guesser).toEqual(player1.id);
+        expect(game.state.drawer).toEqual(player3.id);
+        expect(game.state.guesser).toEqual(player4.id);
       });
     });
   });
