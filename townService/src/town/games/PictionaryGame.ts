@@ -122,7 +122,7 @@ export default class PictionaryGame extends Game<PictionaryGameState, Pictionary
   }
 
   private _assignNewRoles(): void {
-    const team = this.state.round % 2 === 0 ? this.state.teamA : this.state.teamB;
+    const team = this.state.round % 2 === 1 ? this.state.teamA : this.state.teamB;
     if (this.state.round <= 1) {
       this.state = {
         ...this.state,
