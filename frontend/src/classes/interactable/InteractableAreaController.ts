@@ -90,7 +90,7 @@ export default abstract class InteractableAreaController<
   ): boolean {
     const listeners = this._listeners.get(event) ?? [];
     listeners.forEach(listener => listener(...args));
-    console.log('getting to emit', 'listeners', listeners, args);
+    //console.log('getting to emit', 'listeners', listeners, args);
     return true;
   }
 

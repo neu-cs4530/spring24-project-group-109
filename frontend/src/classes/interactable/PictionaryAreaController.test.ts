@@ -140,6 +140,14 @@ describe('[T1] TicTacToeAreaController', () => {
         });
         expect(controller2.gamePiece).toBe('O');
       });
+      it('should throw an error if the current player is not a player in this game', () => {
+        const controller = ticTacToeAreaControllerWithProp({
+          status: 'IN_PROGRESS',
+          x: otherPlayers[0].id,
+          o: otherPlayers[1].id,
+        });
+        expect(() => controller.gamePiece).toThrowError();
+      });
     });
     describe('status', () => {
       it('should return the status of the game', () => {

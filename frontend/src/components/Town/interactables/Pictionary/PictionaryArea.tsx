@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useInteractableAreaController } from '../../../../classes/TownController';
 import PictionaryAreaController from '../../../../classes/interactable/PictionaryAreaController';
 import useTownController from '../../../../hooks/useTownController';
@@ -10,6 +10,7 @@ import PictionaryBoard from './PictionaryBoard';
 import PictionaryColor from './PictionaryColor';
 import PictionaryButtons from './PictionaryButtons';
 import { List, ListItem } from '@chakra-ui/react';
+import { set } from 'lodash';
 
 /**
  * The PictionaryArea component renders the Pictionary game area.
@@ -70,27 +71,61 @@ export default function PictionaryArea({
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
   //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
-  const [timer, setTimer] = useState<number>(120);
+  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
+  const [focus, setFocus] = useState(false);
+
+  const guessInputRef = useRef<HTMLInputElement | null>(null);
 
   const toast = useToast();
 
   // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
 
   //for updating the timer every second of the game
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     console.log('timer: ' + timer);
+  //     pictionaryAreaController.tickDown();
+  //     setTimer(pictionaryAreaController.getTimer());
+  //     // if (timer > 0) {
+  //     //   setTimer(timer - 1);
+  //     //   pictionaryAreaController.tickDown();
+  //     // } else if (timer <= 0) {
+  //     //   pictionaryAreaController.tickDown();
+  //     //   setTimer(pictionaryAreaController.getTimer());
+  //     // }
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [timer]);
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (timer > 0) {
-        setTimer(timer - 1);
-        pictionaryAreaController.tickDown();
-      } else if (timer <= 0) {
-        pictionaryAreaController.tickDown();
-        setTimer(120);
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timer, pictionaryAreaController]);
+    const updateTimer = () => {
+      pictionaryAreaController.tickDown();
+      setTimer(pictionaryAreaController.getTimer());
+
+      // Schedule the next update after 1 second
+      setTimeout(updateTimer, 1000);
+    };
+
+    // Start the initial update
+    const timeoutId = setTimeout(updateTimer, 1000);
+
+    // Cleanup function
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (focus) {
+      townController.pause();
+    } else {
+      townController.unPause();
+    }
+  }, [focus, townController]);
+  useEffect(() => {
+    if (gameStatus) {
+      guessInputRef.current?.focus();
+    }
+  }, [focus]);
 
   //for updating round state
   useEffect(() => {
@@ -104,10 +139,10 @@ export default function PictionaryArea({
       setRound(pictionaryAreaController.getRound());
       setGameStatus(pictionaryAreaController.status);
       setBoard(pictionaryAreaController.board);
-      setTimer(pictionaryAreaController.getTimer());
     };
     const onGameEnd = () => {
       const winner = pictionaryAreaController.winner;
+      setFocus(false);
       if (winner === ' ') {
         toast({
           title: 'Game over',
@@ -229,7 +264,7 @@ export default function PictionaryArea({
   );
   const gameStatusTextScore = (
     <>
-      Game in progress Round: {pictionaryAreaController.getRound() + 1} Currently:{' '}
+      Game in progress Round: {pictionaryAreaController.getRound()} Currently:{' '}
       {pictionaryAreaController.getTeam()} turn <br /> Team A score:{' '}
       {pictionaryAreaController.getTeamAScore()}, Team B score:{' '}
       {pictionaryAreaController.getTeamBScore()}
@@ -310,10 +345,12 @@ export default function PictionaryArea({
             <Container flexDirection='column'>
               {' '}
               <br />
-              {pictionaryAreaController.getGuesser()?.id === townController.ourPlayer.id ? (
+              {guesser?.id === townController.ourPlayer.id ? (
                 <Flex flexDirection='row'>
                   Make a guess with no spaces
                   <Input
+                    ref={guessInputRef}
+                    onFocus={() => setFocus(true)}
                     placeholder='Guess'
                     value={guess}
                     onChange={event => setGuess(event.target.value)}
