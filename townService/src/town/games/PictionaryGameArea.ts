@@ -32,6 +32,9 @@ export default class PictionaryGameArea extends GameArea<PictionaryGame> {
     return 'PictionaryArea';
   }
 
+  /**
+   * Returns the current state of the board.
+   */
   get board(): Color[][] {
     return this._game?.state.board ?? [];
   }

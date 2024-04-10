@@ -80,24 +80,6 @@ export default function PictionaryArea({
 
   const toast = useToast();
 
-  // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
-
-  //for updating the timer every second of the game
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     console.log('timer: ' + timer);
-  //     pictionaryAreaController.tickDown();
-  //     setTimer(pictionaryAreaController.getTimer());
-  //     // if (timer > 0) {
-  //     //   setTimer(timer - 1);
-  //     //   pictionaryAreaController.tickDown();
-  //     // } else if (timer <= 0) {
-  //     //   pictionaryAreaController.tickDown();
-  //     //   setTimer(pictionaryAreaController.getTimer());
-  //     // }
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [timer]);
   useEffect(() => {
     const updateTimer = () => {
       pictionaryAreaController.tickDown();
@@ -129,7 +111,6 @@ export default function PictionaryArea({
 
   //for updating round state
   useEffect(() => {
-    //console.log('enter use effect');
     const updateGameState = () => {
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
@@ -157,11 +138,9 @@ export default function PictionaryArea({
         });
       }
     };
-    //console.log('before game updating');
     pictionaryAreaController.addListener('gameUpdated', updateGameState);
     pictionaryAreaController.addListener('gameEnd', onGameEnd);
     return () => {
-      //console.log('after game updating');
       pictionaryAreaController.removeListener('gameUpdated', updateGameState);
       pictionaryAreaController.removeListener('gameEnd', onGameEnd);
     };
@@ -175,11 +154,11 @@ export default function PictionaryArea({
           await pictionaryAreaController.joinGame();
         } catch (e) {
           console.error(e);
-          toast({
-            title: 'Error joining test game',
-            description: (e as Error).toString(),
-            status: 'error',
-          });
+          // toast({
+          //   title: 'Error joining test game',
+          //   description: (e as Error).toString(),
+          //   status: 'error',
+          // });
         }
         setJoiningGame(false);
       }}
