@@ -71,7 +71,7 @@ export default function PictionaryArea({
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
   //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
-  const [timer, setTimer] = useState<number>(90);
+  const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
   const [focus, setFocus] = useState(false);
@@ -83,18 +83,36 @@ export default function PictionaryArea({
   // TODO: TOAST FOR ROUND SWITCH / TIMER IS ABOUT TO RUN OUT
 
   //for updating the timer every second of the game
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     console.log('timer: ' + timer);
+  //     pictionaryAreaController.tickDown();
+  //     setTimer(pictionaryAreaController.getTimer());
+  //     // if (timer > 0) {
+  //     //   setTimer(timer - 1);
+  //     //   pictionaryAreaController.tickDown();
+  //     // } else if (timer <= 0) {
+  //     //   pictionaryAreaController.tickDown();
+  //     //   setTimer(pictionaryAreaController.getTimer());
+  //     // }
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [timer]);
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (timer > 0) {
-        setTimer(timer - 1);
-        pictionaryAreaController.tickDown();
-      } else if (timer <= 0) {
-        pictionaryAreaController.tickDown();
-        setTimer(pictionaryAreaController.getTimer());
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timer, pictionaryAreaController]);
+    const updateTimer = () => {
+      pictionaryAreaController.tickDown();
+      setTimer(pictionaryAreaController.getTimer());
+
+      // Schedule the next update after 1 second
+      setTimeout(updateTimer, 1000);
+    };
+
+    // Start the initial update
+    const timeoutId = setTimeout(updateTimer, 1000);
+
+    // Cleanup function
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
     if (focus) {

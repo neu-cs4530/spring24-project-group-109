@@ -140,6 +140,14 @@ describe('[T1] TicTacToeAreaController', () => {
         });
         expect(controller2.gamePiece).toBe('O');
       });
+      it('should throw an error if the current player is not a player in this game', () => {
+        const controller = ticTacToeAreaControllerWithProp({
+          status: 'IN_PROGRESS',
+          x: otherPlayers[0].id,
+          o: otherPlayers[1].id,
+        });
+        expect(() => controller.gamePiece).toThrowError();
+      });
     });
     describe('status', () => {
       it('should return the status of the game', () => {
@@ -547,6 +555,15 @@ describe('[T1] TicTacToeAreaController', () => {
           [undefined, undefined, undefined],
         ]);
       });
+    });
+    it('should call super._updateFrom', () => {
+      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore - we are testing spying on a private method
+      const spy = jest.spyOn(GameAreaController.prototype, '_updateFrom');
+      const controller = ticTacToeAreaControllerWithProp({});
+      const model = controller.toInteractableAreaModel();
+      controller.updateFrom(model, otherPlayers.concat(ourPlayer));
+      expect(spy).toHaveBeenCalled();
     });
   });
 });
