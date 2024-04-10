@@ -70,7 +70,7 @@ export default function PictionaryArea({
   const [leavingGame, setLeavingGame] = useState(false);
   const [gameStatus, setGameStatus] = useState<GameStatus>(pictionaryAreaController.status);
   //const [timer, setTimer] = useState<number>(pictionaryAreaController.getTimer());
-  const [timer, setTimer] = useState<number>(60);
+  const [timer, setTimer] = useState<number>(120);
   const [color, setColor] = useState<Color>('#000000');
   const [board, setBoard] = useState(pictionaryAreaController.board);
 
@@ -86,7 +86,7 @@ export default function PictionaryArea({
         pictionaryAreaController.tickDown();
       } else if (timer <= 0) {
         pictionaryAreaController.tickDown();
-        setTimer(60);
+        setTimer(120);
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -99,7 +99,7 @@ export default function PictionaryArea({
       setTeamA(pictionaryAreaController.getTeamAPlayers());
       setTeamB(pictionaryAreaController.getTeamBPlayers());
       setWord(pictionaryAreaController.getWord());
-      setGuess(pictionaryAreaController.getGuess());
+      // setGuess(pictionaryAreaController.getGuess());
       setDrawer(pictionaryAreaController.getDrawer());
       setGuesser(pictionaryAreaController.getGuesser());
       setRound(pictionaryAreaController.getRound());
