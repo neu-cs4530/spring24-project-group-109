@@ -188,10 +188,8 @@ export interface PictionaryGameState extends WinnableGameState {
   usedWords: string[];
   timer: number;
   round: number;
-  // board: WhiteBoardArea;
   guess?: string;
   board:  Color[][] | undefined;
-  // currentColor: Color;
 }
 
 /**
