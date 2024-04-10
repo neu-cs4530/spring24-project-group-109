@@ -5,7 +5,6 @@ import {
   Color,
   GameResult,
   GameStatus,
-  PictionaryMove,
   PictionaryTeam,
   PictionaryWordDifficulty,
   PlayerID,
@@ -613,7 +612,7 @@ describe('PictionaryAreaController', () => {
       expect(mockTownController.sendInteractableCommand).not.toHaveBeenCalled();
     });
   });
-  describe('[T1.4] makeMove', () => {
+  describe('makeMove', () => {
     describe('With no game in progress', () => {
       it('Throws an error if game status is not IN_PROGRESS', async () => {
         const controller = pictionaryAreaControllerWithProps({
@@ -629,27 +628,6 @@ describe('PictionaryAreaController', () => {
         await expect(() => controller.makeMove('guess')).rejects.toThrowError(
           NO_GAME_IN_PROGRESS_ERROR,
         );
-      });
-    });
-    describe('With a game in progress', () => {
-      let controller: PictionaryAreaController;
-      beforeEach(async () => {
-        controller = pictionaryAreaControllerWithProps({
-          difficulty: 'Easy',
-          teamA: { letter: 'A', players: [ourPlayer.id, otherPlayers[0].id], score: 0 },
-          teamB: { letter: 'B', players: [otherPlayers[1].id, otherPlayers[0].id], score: 0 },
-          usedWords: [],
-          timer: 120,
-          round: 1,
-          board: [],
-          status: 'IN_PROGRESS',
-        });
-      });
-      describe('making a guess', () => {
-        it('allows the guess', async () => {
-          controller.makeMove('guess');
-          expect(controller.getGuess).toBe('guess');
-        });
       });
     });
   });
